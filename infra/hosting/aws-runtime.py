@@ -211,7 +211,11 @@ def database():
 
 def register(image):
     env = {'NODE_ENV': 'production', 'AWS_REGION': REGION, 'ENABLE_REAL_LINE': 'true',
-        'ENABLE_REAL_BEDROCK': 'true', 'VISION_ENABLED': 'false', 'AI_MODE': 'disabled',
+        'ENABLE_REAL_BEDROCK': 'true',
+        # Owner approved turning AI chat and image assessment on (21 Nov 2026). Roll back with
+        # AGRIMATCH_AI_MODE=disabled AGRIMATCH_VISION_ENABLED=false, then register + publish.
+        'VISION_ENABLED': os.environ.get('AGRIMATCH_VISION_ENABLED', 'true'),
+        'AI_MODE': os.environ.get('AGRIMATCH_AI_MODE', 'enabled'),
         'BEDROCK_MODEL_ID': 'anthropic.claude-sonnet-5', 'BEDROCK_VISION_MODEL_ID': 'anthropic.claude-sonnet-5',
         'API_INTERNAL_URL': 'http://127.0.0.1:4000', 'WEB_ORIGIN': STATE.get('url', 'https://localhost.invalid'),
         'LINE_FARMER_BASIC_ID': '@642ctpqm', 'LINE_BALER_BASIC_ID': '@237ozbsh', 'LINE_FACTORY_BASIC_ID': '@241sxehz'}
@@ -469,6 +473,11 @@ def seed_status():
 
 
 def publish():
+    # The line_event handler is live and LINE webhooks are on (owner approved, 20-21 Nov 2026), so the worker
+    # follows each new revision. Set AGRIMATCH_WORKER_COUNT=0 to park it again.
+    worker_count = int(os.environ.get('AGRIMATCH_WORKER_COUNT', '1'))
+    if worker_count not in (0, 1):
+        raise RuntimeError('AGRIMATCH_WORKER_COUNT must be 0 or 1.')
     # Express Mode's tagged managed policy failed ModifyRule during the first update.
     # Keep the recovery permission limited to the verified rule for this service.
     if STATE.get('gateway_rule'):
@@ -496,8 +505,8 @@ def publish():
         'networkConfiguration': {'awsvpcConfiguration': {'subnets': STATE['subnets'], 'securityGroups': [STATE['app_sg']], 'assignPublicIp': 'ENABLED'}},
         'tags': [{'key': t['Key'], 'value': t['Value']} for t in TAGS]})['service']['serviceArn'])
     aws('ecs', 'update-service', {'cluster': STATE['cluster'], 'service': STATE['worker_service'],
-        'taskDefinition': STATE['task_worker'], 'desiredCount': 0})
-    print('Application deployment requested; worker intentionally parked at zero until line_event handler is ready.', flush=True)
+        'taskDefinition': STATE['task_worker'], 'desiredCount': worker_count})
+    print(f'Application deployment requested; worker set to {worker_count} task(s) on the new revision.', flush=True)
 
 
 def status():
