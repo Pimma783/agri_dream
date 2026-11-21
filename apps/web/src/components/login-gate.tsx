@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
-import { LoginForm, type LoginFormProps } from './login-form';
+import type { LoginFormProps } from './login-form';
+import { JudgeLoginPanel, type JudgeCredentials } from './judge-login-panel';
 import { Notice } from './feedback';
 import { LOGIN_EXPIRED_MESSAGE } from '@/lib/login';
 import { FACTORY_OA_ID, FARMER_OA_ID, lineAddFriendUrl, qrGeometry, type LoginRole } from '@/lib/line-oa';
@@ -27,7 +28,10 @@ function LinePanel({ oaId, label }: { oaId: string; label: string }) {
   return (
     <div className="space-y-3">
       <QrCode url={url} label={label} />
-      <a href={url} className={LINK_BUTTON}>เพิ่มเพื่อนใน LINE</a>
+      <a href={url} className={LINK_BUTTON}>
+        เพิ่มเพื่อนใน LINE
+        <span className="ml-2 text-sm font-normal">/ Add friend on LINE</span>
+      </a>
     </div>
   );
 }
@@ -35,7 +39,7 @@ function LinePanel({ oaId, label }: { oaId: string; label: string }) {
 function Back({ expired }: { expired: boolean }) {
   return (
     <a href={expired ? '/login?expired=1' : '/login'} className="inline-flex min-h-11 items-center text-base font-medium text-emerald-800 underline">
-      ← กลับ
+      ← กลับ / Back
     </a>
   );
 }
@@ -43,21 +47,28 @@ function Back({ expired }: { expired: boolean }) {
 export interface LoginGateProps extends Pick<LoginFormProps, 'fetchImpl' | 'onSuccess'> {
   role: LoginRole | null;
   expired?: boolean;
+  /** Judge factory account, read on the server. Only shown in the factory view. */
+  judge?: JudgeCredentials | null;
 }
 
-export function LoginGate({ role, expired = false, fetchImpl, onSuccess }: LoginGateProps) {
+export function LoginGate({ role, expired = false, fetchImpl, onSuccess, judge = null }: LoginGateProps) {
   if (role === null) {
     return (
       <div className="space-y-4">
-        <p className="text-base font-medium text-slate-800">คุณคือใคร</p>
+        <p className="text-base font-medium text-slate-800">
+          คุณคือใคร
+          <span className="block text-sm font-normal text-slate-600">Who are you?</span>
+        </p>
         {expired ? <Notice tone="warning">{LOGIN_EXPIRED_MESSAGE}</Notice> : null}
         <a href={`/login?role=farmer${expired ? '&expired=1' : ''}`} className={CHOICE}>
           <span aria-hidden="true" className="text-5xl">🌾</span>
-          เกษตรกร
+          <span>เกษตรกร</span>
+          <span className="text-base font-normal">Farmer</span>
         </a>
         <a href={`/login?role=factory${expired ? '&expired=1' : ''}`} className={CHOICE}>
           <span aria-hidden="true" className="text-5xl">🏭</span>
-          โรงงาน / ผู้รับซื้อ
+          <span>โรงงาน / ผู้รับซื้อ</span>
+          <span className="text-base font-normal">Factory / Buyer</span>
         </a>
       </div>
     );
@@ -66,12 +77,12 @@ export function LoginGate({ role, expired = false, fetchImpl, onSuccess }: Login
     return (
       <div className="space-y-4">
         <Back expired={expired} />
-        <h2 className="text-lg font-semibold">เกษตรกร</h2>
+        <h2 className="text-lg font-semibold">เกษตรกร <span className="text-base font-normal text-slate-600">/ Farmer</span></h2>
         <LinePanel oaId={FARMER_OA_ID} label="QR LINE เกษตรกร" />
         <ol className="list-decimal space-y-1 pl-5 text-base text-slate-700">
-          <li>สแกน QR หรือกดปุ่ม</li>
-          <li>เพิ่มเพื่อนใน LINE</li>
-          <li>พิมพ์หรือกดเมนู เพื่อลงขายฟาง</li>
+          <li>สแกน QR หรือกดปุ่ม <span className="text-sm text-slate-500">/ Scan the QR or tap</span></li>
+          <li>เพิ่มเพื่อนใน LINE <span className="text-sm text-slate-500">/ Add friend</span></li>
+          <li>กดเมนูเพื่อลงขายฟาง <span className="text-sm text-slate-500">/ Use the menu to list straw</span></li>
         </ol>
       </div>
     );
@@ -79,10 +90,10 @@ export function LoginGate({ role, expired = false, fetchImpl, onSuccess }: Login
   return (
     <div className="space-y-5">
       <Back expired={expired} />
-      <h2 className="text-lg font-semibold">โรงงาน / ผู้รับซื้อ</h2>
-      <LoginForm expired={expired} {...(fetchImpl ? { fetchImpl } : {})} {...(onSuccess ? { onSuccess } : {})} />
+      <h2 className="text-lg font-semibold">โรงงาน / ผู้รับซื้อ <span className="text-base font-normal text-slate-600">/ Factory / Buyer</span></h2>
+      <JudgeLoginPanel judge={judge} expired={expired} {...(fetchImpl ? { fetchImpl } : {})} {...(onSuccess ? { onSuccess } : {})} />
       <div className="space-y-3 border-t border-slate-200 pt-4">
-        <p className="text-center text-base font-medium text-slate-700">หรือใช้ผ่าน LINE</p>
+        <p className="text-center text-base font-medium text-slate-700">หรือใช้ผ่าน LINE <span className="text-sm font-normal">/ Or use LINE</span></p>
         <LinePanel oaId={FACTORY_OA_ID} label="QR LINE โรงงาน" />
       </div>
     </div>

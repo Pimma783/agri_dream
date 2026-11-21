@@ -415,6 +415,24 @@ Rules for every task:
     - Component tests for both paths; run lint, typecheck, web and API tests
     - _Requirements: 14, 20_
 
+- [ ] 26. Public presentation microsite and judge demo account [P0]
+  - [x] 26.1 Create a limited judge demo account on hosted [P0]
+    - Dedicated judge organization (BUYER_FACTORY, is_demo, นครสวรรค์) with one MEMBER user, never OWNER; it can create demands, view its matches and send offers, but cannot manage members or organization settings
+    - Password generated, stored in Secrets Manager and in `infra/hosting/private/` (git-ignored); never printed by scripts and never committed
+    - App task definition receives `JUDGE_DEMO_EMAIL` and `JUDGE_DEMO_PASSWORD` from the secret so the presentation page can show them; hosted one-off mode to create it, repeatable
+    - _Requirements: 14, 18_
+  - [x] 26.2 Add the public `/presentation` slide microsite in `apps/web` [P0]
+    - Public without login; Dashboard routes, auth guard and login behaviour unchanged
+    - Five sections: introduction, problem, solution (three LINE roles, matching, offers), technical (deployed AWS architecture diagram), demo (button to `/login`, demo steps, judge account from server env)
+    - Previous/next buttons, keyboard arrows, scroll reading on mobile, Thai/English switch kept in `?lang=`
+    - Real project data only; only working features; interview figures and carbon numbers labelled as estimates or hypotheses; carbon credits and payments shown as out of MVP scope; no secrets
+    - Content readable within 6 minutes; component tests for both languages and navigation
+    - _Requirements: 20_
+  - [ ] 26.3 Show the factory judge login on the login page in Thai and English [P0]
+    - `/login?role=factory` shows the judge factory email and password from server env, labelled in Thai and English, with copy buttons; hidden when the env is missing
+    - The presentation demo slide labels the same account as the factory account in both languages
+    - _Requirements: 20_
+
 ## Notes
 
 - Tasks marked with `*` are optional and can be skipped for a faster MVP. Required property tests cover quantity control (9, 10, 13), permissions (14), idempotency (10, 16), state machines (11, 12), matching filters (3, 4), webhook signature (15), assistant authority (19) and units (1).

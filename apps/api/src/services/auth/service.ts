@@ -129,8 +129,10 @@ export interface DemoOrgUserInput {
   province?: string;
   lat?: string;
   lng?: string;
+  /** Defaults to OWNER. Authorization uses the organization kind; member_role is stored for later member management. */
+  memberRole?: 'OWNER' | 'MEMBER';
 }
-/** Create a demo organization with one OWNER user who can log in. Everything is flagged `is_demo`. */
+/** Create a demo organization with one user (OWNER unless memberRole says otherwise) who can log in. Everything is flagged `is_demo`. */
 export async function createDemoOrgUser(pool: pg.Pool, input: DemoOrgUserInput) {
   const passwordHash = await hashPassword(input.password);
   return withTransaction(pool, async (tx) => {
@@ -148,7 +150,7 @@ export async function createDemoOrgUser(pool: pg.Pool, input: DemoOrgUserInput) 
       display_name: input.displayName ?? input.orgName,
       is_demo: true,
     });
-    await memberships.insert(tx, { user_id: user.id, org_id: org.id, member_role: 'OWNER' });
+    await memberships.insert(tx, { user_id: user.id, org_id: org.id, member_role: input.memberRole ?? 'OWNER' });
     return { org, user };
   });
 }

@@ -29,6 +29,10 @@ SAVED_STATE = json.loads(json.dumps(STATE))
 PROFILE = 'ai-hackathon-936270099588'
 REGION = 'ap-southeast-1'
 PREFIX = 'agrimatch-demo-20261118'
+JUDGE_EMAIL = 'judge@agrimatch.demo'
+JUDGE_ACCOUNT_ENV = {'OWNER_ACCOUNT_ROLE': 'MEMBER', 'OWNER_ACCOUNT_KIND': 'BUYER_FACTORY',
+    'OWNER_ACCOUNT_ORG': 'โรงงานทดลองสำหรับกรรมการ', 'OWNER_ACCOUNT_PROVINCE': 'นครสวรรค์',
+    'OWNER_ACCOUNT_LAT': '15.700000', 'OWNER_ACCOUNT_LNG': '100.140000'}
 DEMO_KEYS = ['DEMO_BALER_PASSWORD', 'DEMO_FACTORY_A_PASSWORD', 'DEMO_FACTORY_B_PASSWORD']
 TAGS = [{'Key': 'Project', 'Value': 'Agrimatch'}, {'Key': 'ManagedBy', 'Value': 'agrimatch-hosting'}]
 
@@ -221,7 +225,7 @@ def register(image):
         'LINE_FARMER_BASIC_ID': '@642ctpqm', 'LINE_BALER_BASIC_ID': '@237ozbsh', 'LINE_FACTORY_BASIC_ID': '@241sxehz'}
     secret_keys = ['DATABASE_URL', 'SESSION_SECRET'] + [f'LINE_{r}_{s}' for r in ('FARMER','BALER','FACTORY') for s in ('CHANNEL_SECRET','ACCESS_TOKEN')]
     modes = ['app', 'worker', 'migrate', 'verify'] + (['seed', 'retire-demo'] if STATE.get('seed_execution_role') else []) + (
-        ['account'] if STATE.get('owner_secret_arn') else [])
+        ['account'] if STATE.get('owner_secret_arn') else []) + (['judge'] if STATE.get('judge_secret_arn') else [])
     for mode in modes:
         bindings = [{'name': k, 'valueFrom': f'{STATE["secret_arn"]}:{"MIGRATION_DATABASE_URL" if mode == "migrate" and k == "DATABASE_URL" else k}::'} for k in secret_keys]
         if mode == 'migrate':
@@ -247,10 +251,22 @@ def register(image):
             task_env = {'NODE_ENV': 'production', 'AWS_REGION': REGION, 'SEED_DEMO_CONFIRM': 'yes',
                         **{f'OWNER_ACCOUNT_{k.upper()}': str(v) for k, v in owner.items() if k != 'password' and v}}
             execution_role = STATE['seed_execution_role']
+        if mode == 'judge':
+            # Same one-off script as `account`, with the judge identity and a MEMBER role. Only the password is a secret.
+            judge = json.loads((PRIVATE_DIR / 'judge-account.json').read_text())
+            bindings = [{'name': 'DATABASE_URL', 'valueFrom': f'{STATE["secret_arn"]}:DATABASE_URL::'},
+                        {'name': 'OWNER_ACCOUNT_PASSWORD', 'valueFrom': f'{STATE["judge_secret_arn"]}:password::'}]
+            task_env = {'NODE_ENV': 'production', 'AWS_REGION': REGION, 'SEED_DEMO_CONFIRM': 'yes',
+                        'OWNER_ACCOUNT_EMAIL': judge['email'], **JUDGE_ACCOUNT_ENV}
+            execution_role = STATE['seed_execution_role']
+        if mode == 'app' and STATE.get('judge_secret_arn'):
+            # The app container renders the judge login hint; the execution role must be allowed to read this secret.
+            bindings += [{'name': 'JUDGE_DEMO_EMAIL', 'valueFrom': f'{STATE["judge_secret_arn"]}:email::'},
+                         {'name': 'JUDGE_DEMO_PASSWORD', 'valueFrom': f'{STATE["judge_secret_arn"]}:password::'}]
         definition = {'family': f'{PREFIX}-{mode}', 'executionRoleArn': execution_role, 'taskRoleArn': STATE['task_role'],
             'networkMode': 'awsvpc', 'requiresCompatibilities': ['FARGATE'], 'cpu': '512' if mode != 'app' else '1024',
             'memory': '1024' if mode != 'app' else '2048', 'runtimePlatform': {'cpuArchitecture': 'X86_64', 'operatingSystemFamily': 'LINUX'},
-            'containerDefinitions': [{'name': 'Main', 'image': image, 'essential': True, 'command': [mode],
+            'containerDefinitions': [{'name': 'Main', 'image': image, 'essential': True, 'command': ['account' if mode == 'judge' else mode],
                 'environment': [{'name': k, 'value': v} for k, v in task_env.items()],
                 'secrets': bindings,
                 'stopTimeout': 60, 'logConfiguration': {'logDriver': 'awslogs', 'options': {
@@ -523,6 +539,60 @@ def account_status():
         print(event['message'], flush=True)
 
 
+def judge_setup():
+    """Creates (once) a random judge password locally, stores {email,password} in its own secret. Nothing is printed."""
+    PRIVATE_DIR.mkdir(mode=0o700, exist_ok=True)
+    private = PRIVATE_DIR / 'judge-account.json'
+    if not private.exists():
+        fd = os.open(private, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+        with os.fdopen(fd, 'w') as f:
+            json.dump({'email': JUDGE_EMAIL, 'password': secrets.token_urlsafe(24)}, f)
+    private.chmod(0o600)
+    judge = json.loads(private.read_text())
+    if not judge.get('email') or len(judge.get('password', '')) < 16:
+        raise RuntimeError('Private judge account file needs email and a strong password.')
+    name = f'{PREFIX}/judge-account'
+    body = json.dumps({'email': judge['email'], 'password': judge['password']})
+    try:
+        STATE['judge_secret_arn'] = aws('secretsmanager', 'describe-secret', {'SecretId': name})['ARN']
+        aws('secretsmanager', 'put-secret-value', {'SecretId': name, 'SecretString': body})
+    except RuntimeError as error:
+        if 'ResourceNotFoundException' not in str(error):
+            raise
+        STATE['judge_secret_arn'] = aws('secretsmanager', 'create-secret', {'Name': name, 'SecretString': body, 'Tags': TAGS})['ARN']
+    save()
+    group = f'/agrimatch/{PREFIX}/judge'
+    existing = aws('logs', 'describe-log-groups', {'logGroupNamePrefix': group})['logGroups']
+    if not any(g['logGroupName'] == group for g in existing):
+        aws('logs', 'create-log-group', {'logGroupName': group})
+    aws('logs', 'put-retention-policy', {'logGroupName': group, 'retentionInDays': 7})
+    resources = [STATE[k] for k in ('secret_arn', 'demo_secret_arn', 'owner_secret_arn', 'judge_secret_arn') if STATE.get(k)]
+    aws('iam', 'put-role-policy', {'RoleName': STATE['seed_execution_role'].rsplit('/', 1)[-1],
+        'PolicyName': 'ReadSeedSecretsOnly', 'PolicyDocument': json.dumps({'Version': '2012-10-17', 'Statement': [{
+            'Effect': 'Allow', 'Action': 'secretsmanager:GetSecretValue', 'Resource': resources}]})})
+    print('Judge account secret and log group ready. No values printed. Register the image again next.', flush=True)
+def judge():
+    if 'task_judge' not in STATE:
+        raise RuntimeError('Run judge-setup, then register the image again.')
+    result = aws('ecs', 'run-task', {'cluster': STATE['cluster'], 'taskDefinition': STATE['task_judge'],
+        'launchType': 'FARGATE', 'platformVersion': 'LATEST', 'count': 1,
+        'networkConfiguration': {'awsvpcConfiguration': {'subnets': STATE['subnets'], 'securityGroups': [STATE['app_sg']], 'assignPublicIp': 'ENABLED'}}})
+    if result.get('failures') or not result.get('tasks'):
+        raise RuntimeError('Judge task placement failed.')
+    STATE['judge_task'] = result['tasks'][0]['taskArn']
+    save()
+    print('Judge task started.', flush=True)
+def judge_status():
+    task = aws('ecs', 'describe-tasks', {'cluster': STATE['cluster'], 'tasks': [STATE['judge_task']]})['tasks'][0]
+    print('Judge task:', task['lastStatus'], 'exit', task['containers'][0].get('exitCode'), flush=True)
+    task_id = STATE['judge_task'].rsplit('/', 1)[-1]
+    try:
+        events = aws('logs', 'get-log-events', {'logGroupName': f'/agrimatch/{PREFIX}/judge',
+            'logStreamName': f'judge/Main/{task_id}', 'startFromHead': True})['events']
+    except RuntimeError:
+        events = []
+    for event in events:
+        print(event['message'], flush=True)
 def seed():
     if 'task_seed' not in STATE:
         raise RuntimeError('Run seed-setup, then register the image again, before seeding.')
@@ -667,6 +737,9 @@ if __name__ == '__main__':
         elif command == 'account-setup': account_setup()
         elif command == 'account': account()
         elif command == 'account-status': account_status()
+        elif command == 'judge-setup': judge_setup()
+        elif command == 'judge': judge()
+        elif command == 'judge-status': judge_status()
         elif command == 'seed-status': seed_status()
         elif command == 'retire-demo': retire_demo()
         elif command == 'retire-demo-status': retire_demo_status()

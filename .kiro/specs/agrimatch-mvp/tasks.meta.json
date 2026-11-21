@@ -1577,6 +1577,42 @@
         "chatSessionId": "sess_56a2b1d0-6be8-46da-9407-b5028deafdc3",
         "timestamp": 1795268234489
       }
+    ],
+    "26.1 Create a limited judge demo account on hosted [P0]": [
+      {
+        "executionId": "842c6b4a-cae7-4d20-853b-c7c14e6c7872",
+        "chatSessionId": "sess_56a2b1d0-6be8-46da-9407-b5028deafdc3",
+        "timestamp": 1795269479097
+      },
+      {
+        "executionId": "4219c377-e0fd-4699-bc6f-748974645be2",
+        "chatSessionId": "sess_56a2b1d0-6be8-46da-9407-b5028deafdc3",
+        "timestamp": 1795271452985
+      }
+    ],
+    "26.2 Add the public `/presentation` slide microsite in `apps/web` [P0]": [
+      {
+        "executionId": "842c6b4a-cae7-4d20-853b-c7c14e6c7872",
+        "chatSessionId": "sess_56a2b1d0-6be8-46da-9407-b5028deafdc3",
+        "timestamp": 1795269479228
+      },
+      {
+        "executionId": "4219c377-e0fd-4699-bc6f-748974645be2",
+        "chatSessionId": "sess_56a2b1d0-6be8-46da-9407-b5028deafdc3",
+        "timestamp": 1795271453701
+      }
+    ],
+    "26.3 Show the factory judge login on the login page in Thai and English [P0]": [
+      {
+        "executionId": "11e32e79-b97b-49c9-901a-bce5eabda6ae",
+        "chatSessionId": "sess_56a2b1d0-6be8-46da-9407-b5028deafdc3",
+        "timestamp": 1795270406508
+      },
+      {
+        "executionId": "11e32e79-b97b-49c9-901a-bce5eabda6ae",
+        "chatSessionId": "sess_56a2b1d0-6be8-46da-9407-b5028deafdc3",
+        "timestamp": 1795270642751
+      }
     ]
   }
 }

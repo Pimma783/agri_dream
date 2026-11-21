@@ -1,5 +1,5 @@
 'use client';
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { BUTTON_CLASS } from './cards';
 import { Notice } from './feedback';
 import { LOGIN_EXPIRED_MESSAGE, loginErrorMessage } from '@/lib/login';
@@ -10,16 +10,24 @@ export interface LoginFormProps {
   fetchImpl?: typeof fetch;
   /** Called after a successful login. Default: full page load of "/", so the new cookie is used. */
   onSuccess?: () => void;
+  /** Pass a new object to replace both fields (used by the judge "fill in" button). */
+  fill?: { email: string; password: string } | null;
 }
 
 const INPUT_CLASS =
   'block min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-base focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-700';
 
-export function LoginForm({ expired = false, fetchImpl, onSuccess }: LoginFormProps) {
+export function LoginForm({ expired = false, fetchImpl, onSuccess, fill }: LoginFormProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    if (!fill) return;
+    setEmail(fill.email);
+    setPassword(fill.password);
+  }, [fill]);
 
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
