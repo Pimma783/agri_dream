@@ -106,7 +106,7 @@ export interface DemandFormState {
   province: string;
   district: string;
   radius: string;
-  provinces: string;
+  provinces: string[];
   from: string;
   to: string;
   quality: Record<QualityKey, QualityState>;
@@ -132,7 +132,7 @@ export const emptyDemandForm = (): DemandFormState => ({
   province: '',
   district: '',
   radius: '',
-  provinces: '',
+  provinces: [],
   from: '',
   to: '',
   quality: emptyQuality(),
@@ -144,7 +144,7 @@ export interface ServiceFormState {
   otherAcknowledged: boolean;
   balingFormat: string;
   mode: ServiceMode | '';
-  provinces: string;
+  provinces: string[];
   province: string;
   district: string;
   minQty: string;
@@ -163,7 +163,7 @@ export const emptyServiceForm = (): ServiceFormState => ({
   otherAcknowledged: false,
   balingFormat: '',
   mode: '',
-  provinces: '',
+  provinces: [],
   province: '',
   district: '',
   minQty: '',
@@ -246,10 +246,10 @@ export function buildDemandPatch(f: DemandFormState): BuildResult<PurchaseDemand
   const minLot = qty(f.minLot, f.minLotUnit, 'min_lot', 'ปริมาณขั้นต่ำ', errors, false);
   const p = price(f.priceMode, f.price, f.priceUnit, errors);
   const province = f.province.trim();
-  if (!province) errors.province = 'กรอกจังหวัด';
+  if (!province) errors.province = 'เลือกจังหวัด';
   const radius = clean(f.radius);
-  if (radius !== '' && (!RADIUS_RE.test(radius) || !isPositive(radius))) errors.radius_km = 'รัศมีต้องมากกว่า 0 กม.';
-  const accepted = parseList(f.provinces);
+  if (radius !== '' && (!RADIUS_RE.test(radius) || !isPositive(radius) || Number(radius) > 80)) errors.radius_km = 'เลือกรัศมี 10 ถึง 80 กม.';
+  const accepted = [...new Set(f.provinces)];
   if (accepted.length > 10) errors.accepted_provinces = 'ระบุได้ไม่เกิน 10 จังหวัด';
   if (f.from && f.to && f.to < f.from) errors.window_to = 'วันสิ้นสุดต้องไม่ก่อนวันเริ่ม';
   if (f.transport === '') errors.transport_by = 'เลือกผู้รับผิดชอบการขนส่ง';
@@ -295,8 +295,8 @@ export function buildServicePatch(f: ServiceFormState): BuildResult<BalingServic
   const capacity = qty(f.capacity, f.capacityUnit, 'capacity', 'กำลังอัดต่อรอบ', errors, false);
   const p = price(f.priceMode, f.price, f.priceUnit, errors);
   const province = f.province.trim();
-  if (!province) errors.province = 'กรอกจังหวัด';
-  const provinces = parseList(f.provinces);
+  if (!province) errors.province = 'เลือกจังหวัด';
+  const provinces = [...new Set(f.provinces)];
   if (provinces.length > 10) errors.service_provinces = 'ระบุได้ไม่เกิน 10 จังหวัด';
   if (f.from && f.to && f.to < f.from) errors.available_to = 'วันสิ้นสุดต้องไม่ก่อนวันเริ่ม';
   if (f.transport === '') errors.transport_by = 'เลือกผู้รับผิดชอบการขนส่ง';

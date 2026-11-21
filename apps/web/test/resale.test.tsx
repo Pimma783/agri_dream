@@ -144,6 +144,25 @@ describe('ResaleEditor', () => {
     expect(screen.getByRole('alert').textContent).toContain('เกินที่จองไว้');
   });
 
+  it('uses province and district selects, clears district on province change, keeps legacy values', async () => {
+    const patch = vi.fn(async () => draft({}, { version: 3 }));
+    const { unmount } = render(<ResaleEditor initial={draft({ province: 'นครสวรรค์', district: 'ตาคลี' })} {...props} api={apiWith({ patch })} />);
+    const province = screen.getByLabelText(/จังหวัดของผู้อัด/) as HTMLSelectElement;
+    const district = screen.getByLabelText('อำเภอ (ถ้ามี)') as HTMLSelectElement;
+    expect([province.tagName, district.tagName]).toEqual(['SELECT', 'SELECT']);
+    expect(district.value).toBe('ตาคลี');
+    expect(district.querySelectorAll('option').length).toBe(16);
+    fireEvent.change(province, { target: { value: 'ภูเก็ต' } });
+    expect(district.value).toBe('');
+    expect(district.disabled).toBe(true);
+    unmount();
+    render(<ResaleEditor initial={draft({ province: 'Uttaradit city', district: 'ลับแล' })} {...props} api={apiWith({ patch })} />);
+    expect((screen.getByLabelText(/จังหวัดของผู้อัด/) as HTMLSelectElement).value).toBe('Uttaradit city');
+    fireEvent.click(screen.getByRole('button', { name: 'บันทึกและตรวจก่อนเผยแพร่' }));
+    await waitFor(() => expect(patch).toHaveBeenCalled());
+    const call = patch.mock.calls[0] as unknown as [string, unknown, { patch: Record<string, unknown> }];
+    expect(call[2].patch).toMatchObject({ province: 'Uttaradit city', district: 'ลับแล' });
+  });
   it('shows the expected-date field only while pending', () => {
     render(<ResaleEditor initial={draft()} {...props} />);
     expect(screen.getByLabelText(/วันที่คาดว่าจะพร้อม/)).toBeTruthy();

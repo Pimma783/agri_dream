@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
-import { balingServicePatchSchema, purchaseDemandPatchSchema, type DraftView } from '@agrimatch/contracts';
+import { balingServicePatchSchema, DISTRICTS_BY_PROVINCE, purchaseDemandPatchSchema, THAI_PROVINCES, type DraftView } from '@agrimatch/contracts';
 import { BalerIntentPicker } from '@/components/baler-intent-picker';
 import { DemandForm, ServiceForm } from '@/components/posting-form';
 import { PostingActions } from '@/components/posting-actions';
@@ -92,7 +92,7 @@ describe('patch builders', () => {
     expect(buildDemandPatch(okDemand({ from: '2026-12-02', to: '2026-12-01' })).ok).toBe(false);
     expect(buildDemandPatch(okDemand({ radius: '0' })).ok).toBe(false);
     expect(parseList('ก, ข，ก\nค')).toEqual(['ก', 'ข，ก', 'ค']);
-    const r = buildDemandPatch(okDemand({ radius: '60', provinces: 'พิษณุโลก, สุโขทัย' }));
+    const r = buildDemandPatch(okDemand({ radius: '60', provinces: ['พิษณุโลก', 'สุโขทัย'] }));
     expect(r.ok && r.patch.accepted_provinces).toEqual(['พิษณุโลก', 'สุโขทัย']);
   });
 
@@ -282,5 +282,62 @@ describe('navigation', () => {
     expect(ready('BALER', '/demands')).toBe(true);
     expect(ready('BALER', '/services')).toBe(true);
     expect(ready('BALER', '/offers')).toBe(true);
+  });
+});
+
+describe('pick lists on posting forms', () => {
+  it('has 77 unique provinces and official district counts for the pilot provinces', () => {
+    expect(THAI_PROVINCES.length).toBe(77);
+    expect(new Set(THAI_PROVINCES).size).toBe(77);
+    expect(DISTRICTS_BY_PROVINCE['อุตรดิตถ์']?.length).toBe(9);
+    expect(DISTRICTS_BY_PROVINCE['นครสวรรค์']?.length).toBe(15);
+    expect(DISTRICTS_BY_PROVINCE['กำแพงเพชร']?.length).toBe(11);
+  });
+  it('DemandForm: province, district, radius are selects; changing province clears district', () => {
+    render(<DemandForm api={fakeApi(vi.fn())} />);
+    const province = screen.getByLabelText('จังหวัดที่ตั้ง') as HTMLSelectElement;
+    expect(province.tagName).toBe('SELECT');
+    expect(province.querySelectorAll('option').length).toBe(78);
+    expect([...province.querySelectorAll('optgroup')[0]!.querySelectorAll('option')].map((o) => o.value)).toEqual(['อุตรดิตถ์', 'นครสวรรค์', 'กำแพงเพชร']);
+    const district = screen.getByLabelText('อำเภอ (ถ้ามี)') as HTMLSelectElement;
+    expect(district.disabled).toBe(true);
+    fireEvent.change(province, { target: { value: 'อุตรดิตถ์' } });
+    expect(district.disabled).toBe(false);
+    expect(district.querySelectorAll('option').length).toBe(10);
+    fireEvent.change(district, { target: { value: 'ลับแล' } });
+    expect(district.value).toBe('ลับแล');
+    fireEvent.change(province, { target: { value: 'นครสวรรค์' } });
+    expect(district.value).toBe('');
+    fireEvent.change(province, { target: { value: 'ภูเก็ต' } });
+    expect(district.disabled).toBe(true);
+    const radius = screen.getByLabelText(/รัศมีรับซื้อ/) as HTMLSelectElement;
+    expect([...radius.options].map((o) => o.value)).toEqual(['', '10', '20', '30', '40', '50', '60', '70', '80']);
+  });
+  it('DemandForm: accepted provinces are checkboxes, capped at 10, sent as an array', async () => {
+    const post = vi.fn(async () => draftView({}, {}));
+    render(<DemandForm api={fakeApi(post)} />);
+    fillDemand();
+    fireEvent.click(screen.getByLabelText('พิษณุโลก'));
+    for (const p of ['สุโขทัย', 'ตาก', 'ลำปาง', 'แพร่', 'น่าน', 'พะเยา', 'เชียงราย', 'เชียงใหม่', 'ลำพูน']) fireEvent.click(screen.getByLabelText(p));
+    expect(screen.getByRole('status').textContent).toContain('ครบ 10 จังหวัด');
+    expect((screen.getByLabelText('ภูเก็ต') as HTMLInputElement).disabled).toBe(true);
+    fireEvent.click(screen.getByLabelText('ลำพูน'));
+    expect(screen.queryByRole('status')).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'ตรวจก่อนประกาศ' }));
+    await waitFor(() => expect(post).toHaveBeenCalled());
+    const body = (post.mock.calls[0] as unknown as [string, unknown, { patch: Record<string, unknown> }])[2];
+    expect(body.patch.accepted_provinces).toEqual(['พิษณุโลก', 'สุโขทัย', 'ตาก', 'ลำปาง', 'แพร่', 'น่าน', 'พะเยา', 'เชียงราย', 'เชียงใหม่']);
+  });
+  it('keeps a legacy province and radius as selected options', () => {
+    const r = buildDemandPatch(okDemand({ province: 'Uttaradit', radius: '45', provinces: ['เมืองเก่า'] }));
+    expect(r.ok).toBe(true);
+    expect(r.ok && r.patch.province).toBe('Uttaradit');
+    expect(r.ok && r.patch.accepted_provinces).toEqual(['เมืองเก่า']);
+  });
+  it('ServiceForm: province select and service-province checkboxes', () => {
+    render(<ServiceForm api={fakeApi(vi.fn())} />);
+    expect((screen.getByLabelText('จังหวัดที่ตั้ง') as HTMLSelectElement).tagName).toBe('SELECT');
+    expect(screen.getByLabelText('นครสวรรค์', { selector: 'input' }).getAttribute('type')).toBe('checkbox');
+    expect(screen.getByText(/เลือกได้ไม่เกิน 10 จังหวัด/)).toBeTruthy();
   });
 });

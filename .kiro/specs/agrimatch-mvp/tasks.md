@@ -393,6 +393,28 @@ Rules for every task:
     - Run the full local test suite, typecheck and lint
     - _Requirements: 9, 18_
 
+- [x] 24. Dashboard forms use pick lists instead of free text [P0]
+  - [ ] 24.1 Replace free-text fields with dropdowns or checkboxes on every Dashboard posting form [P0]
+    - Demand, sale and resale listing, baling service and baling request forms (new and edit)
+    - Province: dropdown of the 77 Thai provinces from the existing province data; pilot provinces (อุตรดิตถ์, นครสวรรค์, กำแพงเพชร) listed first
+    - District: dropdown that depends on the chosen province, with district lists for the 3 pilot provinces; other provinces show a disabled «ไม่ระบุ» option because no district data exists yet
+    - Radius: dropdown 10, 20, 30, 40, 50, 60, 70, 80 km (80 km hard cap)
+    - Accepted and service provinces: multi-select checkboxes from the province list (max 10), not comma text
+    - Keep typed inputs only for prices and quantity numbers; units stay as dropdowns
+    - Existing saved values that are not in a list still display and save unchanged
+    - Component tests for each changed form; run lint, typecheck, web and API tests
+    - _Requirements: 1, 3, 20_
+
+- [x] 25. Role chooser before login [P0]
+  - [x] 25.1 Add a farmer or factory choice in front of the Dashboard login form [P0]
+    - `/login` first shows two large icon buttons «เกษตรกร» and «โรงงาน / ผู้รับซื้อ»
+    - Farmer: QR code and add-friend button for the farmer LINE OA (`https://line.me/R/ti/p/@642ctpqm`), short steps, no login form
+    - Factory: QR code and add-friend button for the factory LINE OA (`https://line.me/R/ti/p/@241sxehz`) plus the existing email login form on the same screen
+    - QR rendered locally as SVG (no third-party QR web service); OA IDs come from config with these defaults
+    - Back button to the choice; a `?role=` query keeps the choice on reload; the existing login, redirect and CSRF behaviour are unchanged
+    - Component tests for both paths; run lint, typecheck, web and API tests
+    - _Requirements: 14, 20_
+
 ## Notes
 
 - Tasks marked with `*` are optional and can be skipped for a faster MVP. Required property tests cover quantity control (9, 10, 13), permissions (14), idempotency (10, 16), state machines (11, 12), matching filters (3, 4), webhook signature (15), assistant authority (19) and units (1).

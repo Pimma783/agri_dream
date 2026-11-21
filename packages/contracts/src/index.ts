@@ -513,3 +513,41 @@ export type NotificationListDto = z.infer<typeof notificationListSchema>;
 /** `POST /notifications/:id/read` and `POST /notifications/read-all`. */
 export const notificationUnreadSchema = z.object({ unread_count: z.number().int().min(0) });
 export type NotificationUnreadDto = z.infer<typeof notificationUnreadSchema>;
+
+// Pick lists for Dashboard forms. Province names are the stored form used by the API and matching:
+// the Thai name without the «จังหวัด» prefix (same spelling as the canonical-thai-provinces migration).
+
+/** Pilot provinces, in the order shown first in every province list. */
+export const PILOT_PROVINCE_NAMES = ['อุตรดิตถ์', 'นครสวรรค์', 'กำแพงเพชร'] as const;
+
+/** All 77 provinces (Bangkok counts as one), Thai alphabetical order. */
+export const THAI_PROVINCES = [
+  'กรุงเทพมหานคร', 'กระบี่', 'กาญจนบุรี', 'กาฬสินธุ์', 'กำแพงเพชร', 'ขอนแก่น', 'จันทบุรี', 'ฉะเชิงเทรา',
+  'ชลบุรี', 'ชัยนาท', 'ชัยภูมิ', 'ชุมพร', 'เชียงราย', 'เชียงใหม่', 'ตรัง', 'ตราด', 'ตาก', 'นครนายก',
+  'นครปฐม', 'นครพนม', 'นครราชสีมา', 'นครศรีธรรมราช', 'นครสวรรค์', 'นนทบุรี', 'นราธิวาส', 'น่าน', 'บึงกาฬ',
+  'บุรีรัมย์', 'ปทุมธานี', 'ประจวบคีรีขันธ์', 'ปราจีนบุรี', 'ปัตตานี', 'พระนครศรีอยุธยา', 'พะเยา', 'พังงา',
+  'พัทลุง', 'พิจิตร', 'พิษณุโลก', 'เพชรบุรี', 'เพชรบูรณ์', 'แพร่', 'ภูเก็ต', 'มหาสารคาม', 'มุกดาหาร',
+  'แม่ฮ่องสอน', 'ยโสธร', 'ยะลา', 'ร้อยเอ็ด', 'ระนอง', 'ระยอง', 'ราชบุรี', 'ลพบุรี', 'ลำปาง', 'ลำพูน', 'เลย',
+  'ศรีสะเกษ', 'สกลนคร', 'สงขลา', 'สตูล', 'สมุทรปราการ', 'สมุทรสงคราม', 'สมุทรสาคร', 'สระแก้ว', 'สระบุรี',
+  'สิงห์บุรี', 'สุโขทัย', 'สุพรรณบุรี', 'สุราษฎร์ธานี', 'สุรินทร์', 'หนองคาย', 'หนองบัวลำภู', 'อ่างทอง',
+  'อำนาจเจริญ', 'อุดรธานี', 'อุตรดิตถ์', 'อุทัยธานี', 'อุบลราชธานี',
+] as const;
+
+/** Official districts (อำเภอ, without the prefix) for the pilot provinces only. */
+export const DISTRICTS_BY_PROVINCE: Readonly<Record<string, readonly string[]>> = {
+  อุตรดิตถ์: ['เมืองอุตรดิตถ์', 'ตรอน', 'ท่าปลา', 'น้ำปาด', 'ฟากท่า', 'บ้านโคก', 'พิชัย', 'ลับแล', 'ทองแสนขัน'],
+  นครสวรรค์: [
+    'เมืองนครสวรรค์', 'โกรกพระ', 'ชุมแสง', 'หนองบัว', 'บรรพตพิสัย', 'เก้าเลี้ยว', 'ตาคลี', 'ท่าตะโก',
+    'ไพศาลี', 'พยุหะคีรี', 'ลาดยาว', 'ตากฟ้า', 'แม่วงก์', 'แม่เปิน', 'ชุมตาบง',
+  ],
+  กำแพงเพชร: [
+    'เมืองกำแพงเพชร', 'ไทรงาม', 'คลองลาน', 'ขาณุวรลักษบุรี', 'คลองขลุง', 'พรานกระต่าย', 'ลานกระบือ',
+    'ทรายทองวัฒนา', 'ปางศิลาทอง', 'บึงสามัคคี', 'โกสัมพีนคร',
+  ],
+};
+
+/** Radius choices in km; 80 is the hard cap of the matching distance. */
+export const RADIUS_KM_OPTIONS = ['10', '20', '30', '40', '50', '60', '70', '80'] as const;
+
+/** Maximum accepted/service provinces on one posting (same as the API limit). */
+export const MAX_PROVINCE_CHOICES = 10;

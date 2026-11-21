@@ -30,6 +30,7 @@ import { defaultPostingsApi, newIdempotencyKey, publishDraft, saveDraft, type Po
 import { BUTTON_CLASS, Field } from './cards';
 import { EstimateLabel } from './labels';
 import { Notice } from './feedback';
+import { DistrictSelect, ProvinceChecks, ProvinceSelect, RadiusSelect } from './place-fields';
 import { AmountInput, CheckBox, CheckChoice, FieldGroup, KG_TON_UNITS, RadioChoice, TextInput } from './form-fields';
 
 const SECONDARY_BUTTON =
@@ -316,10 +317,10 @@ export function DemandForm(props: Omit<PostingFormProps, 'kind'> & { resale?: bo
         onAmount={(v) => set('price', v)}
         onUnit={(u) => set('priceUnit', u)}
       />
-      <TextInput label="จังหวัดที่ตั้ง" value={f.province} onChange={(v) => set('province', v)} error={errors.province} />
-      <TextInput label="อำเภอ (ถ้ามี)" value={f.district} onChange={(v) => set('district', v)} />
-      <TextInput label="รัศมีรับซื้อ (กม.)" hint="ระบบจับคู่ระยะขนส่งไม่เกิน 80 กม." inputMode="decimal" value={f.radius} onChange={(v) => set('radius', v)} error={errors.radius_km} />
-      <TextInput label="จังหวัดที่รับ" hint="คั่นด้วยเครื่องหมายจุลภาค เช่น อุตรดิตถ์, พิษณุโลก" value={f.provinces} onChange={(v) => set('provinces', v)} error={errors.accepted_provinces} />
+      <ProvinceSelect label="จังหวัดที่ตั้ง" value={f.province} onChange={(v) => setF((s) => ({ ...s, province: v, district: '' }))} error={errors.province} />
+      <DistrictSelect province={f.province} value={f.district} onChange={(v) => set('district', v)} />
+      <RadiusSelect value={f.radius} onChange={(v) => set('radius', v)} error={errors.radius_km} />
+      <ProvinceChecks name="accepted_provinces" label="จังหวัดที่รับ" values={f.provinces} onChange={(v) => set('provinces', v)} error={errors.accepted_provinces} />
       <TextInput label="รับตั้งแต่วันที่" type="date" value={f.from} onChange={(v) => set('from', v)} />
       <TextInput label="รับถึงวันที่" type="date" value={f.to} onChange={(v) => set('to', v)} error={errors.window_to} />
       <FieldGroup label="เงื่อนไขคุณภาพ" hint={`ติ๊ก "${VERIFY_LABEL}" ถ้าต้องมีการตรวจก่อนรับ`}>
@@ -430,9 +431,9 @@ export function ServiceForm(props: Omit<PostingFormProps, 'kind'>) {
         onAmount={(v) => set('price', v)}
         onUnit={(u) => set('priceUnit', u)}
       />
-      <TextInput label="จังหวัดที่ตั้ง" value={f.province} onChange={(v) => set('province', v)} error={errors.province} />
-      <TextInput label="อำเภอ (ถ้ามี)" value={f.district} onChange={(v) => set('district', v)} />
-      <TextInput label="จังหวัดที่ให้บริการ" hint="คั่นด้วยเครื่องหมายจุลภาค" value={f.provinces} onChange={(v) => set('provinces', v)} error={errors.service_provinces} />
+      <ProvinceSelect label="จังหวัดที่ตั้ง" value={f.province} onChange={(v) => setF((s) => ({ ...s, province: v, district: '' }))} error={errors.province} />
+      <DistrictSelect province={f.province} value={f.district} onChange={(v) => set('district', v)} />
+      <ProvinceChecks name="service_provinces" label="จังหวัดที่ให้บริการ" values={f.provinces} onChange={(v) => set('provinces', v)} error={errors.service_provinces} />
       <TextInput label="ให้บริการตั้งแต่วันที่" type="date" value={f.from} onChange={(v) => set('from', v)} />
       <TextInput label="ให้บริการถึงวันที่" type="date" value={f.to} onChange={(v) => set('to', v)} error={errors.available_to} />
       <RadioChoice label="ใครรับผิดชอบการขนส่ง" name="transport_by" value={f.transport} options={TRANSPORT_CHOICES} onChange={(v) => set('transport', v)} error={errors.transport_by} />

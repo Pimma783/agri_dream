@@ -24,6 +24,7 @@ import {
 } from '@/lib/resale';
 import { BUTTON_CLASS, Field } from './cards';
 import { Notice } from './feedback';
+import { DistrictSelect, ProvinceSelect } from './place-fields';
 import { AmountInput, CheckBox, KG_TON_UNITS, RadioChoice, TextInput } from './form-fields';
 import { EstimateLabel } from './labels';
 
@@ -261,8 +262,13 @@ export function ResaleEditor(props: ResaleEditorProps) {
         />
       ) : null}
       {form.priceMode === 'NEGOTIABLE' ? <p className="text-sm text-slate-700">ราคาตกลงกันภายหลัง ไม่ถือว่าเป็นราคา 0 บาท</p> : null}
-      <TextInput label="จังหวัดของผู้อัด" hint="สถานที่ขายต่อของคุณ ไม่ใช่ที่ตั้งของเกษตรกร" value={form.province} onChange={(v) => set('province', v)} />
-      <TextInput label="อำเภอ (ถ้ามี)" value={form.district} onChange={(v) => set('district', v)} />
+      <ProvinceSelect
+        label="จังหวัดของผู้อัด"
+        hint="สถานที่ขายต่อของคุณ ไม่ใช่ที่ตั้งของเกษตรกร"
+        value={form.province}
+        onChange={(v) => setForm((s) => ({ ...s, province: v, district: '' }))}
+      />
+      <DistrictSelect province={form.province} value={form.district} onChange={(v) => set('district', v)} />
       <CheckBox label="วัสดุยังไม่พร้อมส่ง (รอรับ/รออัด)" checked={form.pending} onChange={(on) => set('pending', on)} />
       {form.pending ? (
         <TextInput

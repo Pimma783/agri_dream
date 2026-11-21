@@ -1539,6 +1539,44 @@
         "chatSessionId": "sess_56a2b1d0-6be8-46da-9407-b5028deafdc3",
         "timestamp": 1795262444652
       }
+    ],
+    "24.1 Replace free-text fields with dropdowns or checkboxes on every Dashboard posting form [P0]": [
+      {
+        "executionId": "b5a77b95-62bb-4fc8-845d-14c45f0d39cd",
+        "chatSessionId": "sess_56a2b1d0-6be8-46da-9407-b5028deafdc3",
+        "timestamp": 1795266536938
+      },
+      {
+        "executionId": "b5a77b95-62bb-4fc8-845d-14c45f0d39cd",
+        "chatSessionId": "sess_56a2b1d0-6be8-46da-9407-b5028deafdc3",
+        "timestamp": 1795267460292
+      }
+    ],
+    "24. Dashboard forms use pick lists instead of free text [P0]": [
+      {
+        "executionId": "b5a77b95-62bb-4fc8-845d-14c45f0d39cd",
+        "chatSessionId": "sess_56a2b1d0-6be8-46da-9407-b5028deafdc3",
+        "timestamp": 1795267460422
+      }
+    ],
+    "25.1 Add a farmer or factory choice in front of the Dashboard login form [P0]": [
+      {
+        "executionId": "43566bda-b344-482f-add2-93f8c1a013ca",
+        "chatSessionId": "sess_56a2b1d0-6be8-46da-9407-b5028deafdc3",
+        "timestamp": 1795268066169
+      },
+      {
+        "executionId": "43566bda-b344-482f-add2-93f8c1a013ca",
+        "chatSessionId": "sess_56a2b1d0-6be8-46da-9407-b5028deafdc3",
+        "timestamp": 1795268234405
+      }
+    ],
+    "25. Role chooser before login [P0]": [
+      {
+        "executionId": "43566bda-b344-482f-add2-93f8c1a013ca",
+        "chatSessionId": "sess_56a2b1d0-6be8-46da-9407-b5028deafdc3",
+        "timestamp": 1795268234489
+      }
     ]
   }
 }
