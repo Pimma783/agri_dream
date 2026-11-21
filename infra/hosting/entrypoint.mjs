@@ -12,9 +12,11 @@ const specs = {
   verify: [['node', ['/app/infra/hosting/verify.mjs'], '/app', {}]],
   // One-off demo seed as the restricted app role. tsx is installed in the image (the build stage keeps devDependencies).
   seed: [['node', ['../../node_modules/tsx/dist/cli.mjs', 'scripts/seed-demo.ts', '--recompute'], '/app/apps/api', {}]],
+  // One-off: create the single owner-chosen test account (see apps/api/scripts/create-account.ts).
+  account: [['node', ['../../node_modules/tsx/dist/cli.mjs', 'scripts/create-account.ts'], '/app/apps/api', {}]],
 };
 if (!(mode in specs)) {
-  console.error('Expected app, worker, migrate, verify, or seed.');
+  console.error('Expected app, worker, migrate, verify, seed, or account.');
   process.exit(1);
 }
 let stopping = false;
