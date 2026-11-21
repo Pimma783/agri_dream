@@ -1,0 +1,161 @@
+* { box-sizing: border-box; }
+body { margin: 0; background: #f4f7ef; color: #193426; font: 16px/1.6 system-ui, sans-serif; }
+header { background: #173f2c; color: white; }
+main { max-width: 760px; margin: auto; padding: 20px; }
+main { padding-top: clamp(26px, 6vw, 64px); }
+h1 { line-height: 1.2; font-size: clamp(2rem, 6vw, 3rem); margin: 0; }
+p { color: #45604f; }
+form, li { background: white; border: 1px solid #d4dfd2; border-radius: 18px; padding: 18px; }
+.fields { display: grid; gap: 12px; }
+@media (min-width: 640px) { .fields { grid-template-columns: repeat(3, 1fr); } }
+label { display: grid; align-content: start; gap: 6px; font-weight: 650; min-width: 0; }
+select, input, button { font: inherit; min-height: 48px; border-radius: 9px; }
+select, input { padding: 8px 10px; width: 100%; background: #fbfcf9; border: 1px solid #9cae9e; color: #193426; }
+button { padding: 8px 18px; border: none; background: #245a3e; color: white; cursor: pointer; font-weight: 700; }
+form button { width: 100%; margin-top: 16px; }
+button:disabled { opacity: .6; cursor: default; }
+small, [aria-invalid="true"] { color: #a22a21; }
+[aria-invalid="true"] { border-color: #a22a21; }
+ol { padding: 0; list-style: none; }
+li { margin: 0 0 10px; }
+li strong { display: block; }
+#liff-status:empty { display: none; }
+
+/* ---- Lot planning (tasks 7.x) ---- */
+html { -webkit-text-size-adjust: 100%; }
+body, main, section, article, div, p, li, label, small, strong, span, h1, h2, h3, dd, dt, summary, button, a {
+  overflow-wrap: anywhere;
+}
+img, table, pre { max-width: 100%; }
+main { width: 100%; }
+@media (max-width: 480px) {
+  main { padding: 14px; }
+  h1 { font-size: 1.6rem; }
+}
+h2 { font-size: 1.2rem; line-height: 1.3; margin: 0 0 8px; }
+h3 { font-size: 1rem; margin: 0 0 6px; }
+button, select, input, textarea, summary, [role="tab"], a.button { min-height: 44px; min-width: 44px; }
+textarea { font: inherit; padding: 8px 10px; width: 100%; border: 1px solid #9cae9e; border-radius: 9px; }
+button.secondary { background: #fff; color: #245a3e; border: 2px solid #245a3e; }
+button:focus-visible, input:focus-visible, select:focus-visible, [role="tab"]:focus-visible, summary:focus-visible {
+  outline: 3px solid #f0b429; outline-offset: 2px;
+}
+summary { cursor: pointer; font-weight: 700; display: flex; align-items: center; padding: 6px 0; }
+
+[role="tabpanel"][hidden], [hidden] { display: none !important; }
+
+/* status badge */
+.status-badge {
+  display: inline-flex; align-items: center; min-height: 32px; padding: 2px 14px; border-radius: 20px;
+  font-weight: 750; background: #e8ece6; color: #2e4637; border: 1px solid #b9c7bb;
+}
+.status-badge.draft, .status-badge[data-status="draft"] { background: #eceeea; color: #3d4a41; border-color: #b9c1ba; }
+.status-badge.awaiting_confirmation, .status-badge[data-status="awaiting_confirmation"] { background: #fff1c9; color: #6a4a00; border-color: #e3c25a; }
+.status-badge.ready, .status-badge[data-status="ready"] { background: #d3efd9; color: #14502a; border-color: #7cc08f; }
+.status-badge.closed, .status-badge[data-status="closed"] { background: #dfe4f2; color: #26356b; border-color: #9fabd3; }
+
+/* cards and lists */
+.card { background: white; border: 1px solid #d4dfd2; border-radius: 18px; padding: 14px; margin: 0 0 12px; min-width: 0; }
+.card > :last-child { margin-bottom: 0; }
+.plot { background: white; border: 1px solid #d4dfd2; border-left: 6px solid #3d8b5c; border-radius: 14px; padding: 12px; margin: 0 0 10px; list-style: none; }
+.plot.excluded { background: #f1f1ee; border-left-color: #8b8b84; color: #5a5f5b; }
+.plot .reason { color: #a22a21; font-size: .9rem; }
+
+/* cost vs offer: visually distinct */
+.cost, .offer { border-radius: 14px; padding: 12px; margin: 0 0 10px; }
+.cost { background: #fff7e0; border: 2px dashed #c79a1e; }
+.offer { background: #e6f1fb; border: 2px solid #3b78b5; }
+.cost strong, .offer strong { display: inline; font-size: 1.15rem; }
+
+/* confirmation list */
+.parties { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.parties li { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 12px; border-radius: 12px; }
+.parties li.pending, .parties .pending { border-left: 6px solid #c79a1e; }
+.parties li.confirmed, .parties .confirmed { border-left: 6px solid #3d8b5c; }
+.parties li button { flex: 0 0 auto; }
+
+/* notices */
+.notice { background: #eef4ea; border: 1px solid #b9cdb9; border-radius: 12px; padding: 10px 12px; margin: 0 0 12px; color: #193426; }
+.notice.reset { background: #fff1c9; border-color: #e3c25a; color: #4d3700; }
+.notice.error, .error { background: #fdeceb; border-color: #e19a95; color: #a22a21; }
+.error { font-weight: 650; }
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center;
+  padding: 16px; background: rgba(15, 30, 22, .6); overflow-y: auto;
+}
+.modal-overlay > * { background: white; border-radius: 18px; padding: 18px; width: 100%; max-width: 420px; }
+
+/* primary action */
+.primary-action { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 52px; margin: 10px 0; font-size: 1.1rem; background: #1d6b3f; }
+.lot-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.lot-head h2 { margin: 0; }
+
+/* ---- Visual pass (task 7.3, reopened): compact, phone-first ---- */
+main { padding-top: 12px; padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px)); }
+label { line-height: 1.35; font-size: 1rem; }
+small { font-size: .9rem; }
+small:empty { display: none; }
+
+/* order form: two columns for short fields */
+#lot-root h2 { font-size: 1.15rem; margin: 0 0 6px; }
+#lot-order-form { padding: 12px; border-radius: 14px; }
+#lot-order-form .fields { grid-template-columns: 1fr 1fr; gap: 8px 10px; }
+#lot-order-form .fields > label { gap: 4px; align-content: end; }
+#lot-order-form .fields > label:nth-child(1),
+#lot-order-form .fields > label:nth-child(5) { grid-column: 1 / -1; }
+#lot-order-form > p { margin: 8px 0 0; font-size: 1rem; line-height: 1.4; }
+#lot-order-form button { margin: 8px 0 0; width: 100%; }
+#lot-order-form button.primary-action { min-height: 48px; margin-top: 8px; }
+@media (max-width: 400px) {
+  #lot-order-form .fields > label:nth-child(4) { grid-column: 1 / -1; }
+}
+
+/* lot summary: status, tons, next action */
+.lot-head { justify-content: space-between; margin: 0 0 8px; }
+.lot-head h2 { font-size: 1.3rem; }
+.status-badge { min-height: 40px; padding: 4px 18px; font-size: 1.1rem; border-width: 2px; }
+.tons-card { border: 2px solid #245a3e; background: #fff; padding: 10px 12px; margin: 0 0 10px; }
+.tons-grid { display: grid; grid-auto-flow: column; grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  grid-template-rows: auto auto; gap: 0 8px; margin: 0; text-align: center; }
+.tons-grid dt { font-size: 1rem; color: #45604f; font-weight: 650; margin: 0; }
+.tons-grid dd { margin: 0; font-size: 1.25rem; font-weight: 750; color: #193426; line-height: 1.3; }
+.tons-grid dd.estimate { font-size: 1.75rem; font-weight: 800; color: #14502a; }
+.tons-grid dt:nth-of-type(2) { color: #14502a; }
+.primary-action { min-height: 56px; font-size: 1.15rem; margin: 0 0 12px; box-shadow: 0 2px 0 #11452a; }
+.parties li .primary-action, .modal-overlay .primary-action { margin: 8px 0 0; }
+
+/* cost / offer */
+.offer, .cost { padding: 10px 12px; }
+.offer > div:first-child, .cost > div:first-child { font-weight: 700; }
+.offer { border-left-width: 8px; }
+.cost { border-left: 8px dashed #c79a1e; }
+.offer input { margin: 6px 0; }
+details > summary { background: #e8f0e4; border-radius: 10px; padding: 6px 12px; margin: 0 0 10px; }
+.card li, .plot { overflow-wrap: anywhere; }
+ol.parties, details ol { padding-left: 0; }
+.addable { padding: 0; list-style: none; }
+.addable li { margin: 0 0 8px; }
+form[aria-label="น้ำหนักชั่งจริง"] { padding: 12px; }
+form[aria-label="น้ำหนักชั่งจริง"] .primary-action { margin-top: 10px; margin-bottom: 0; }
+.card > ol > li:not(.plot):not(.pending):not(.done) { border: 0; border-bottom: 1px solid #e3eae1; border-radius: 0; padding: 6px 0; background: transparent; margin: 0; }
+
+/* ---- Top bar + bottom navigation ---- */
+header { padding: 6px 0 4px; }
+header .bar, header .bar-context { max-width: 760px; margin: 0 auto; padding: 0 14px; }
+header .bar { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.brand { font-weight: 750; font-size: 1rem; line-height: 1.4; }
+.demo-badge { background: #dce9a6; color: #263813; border-radius: 20px; padding: 0 10px; font-size: .8rem; line-height: 1.5; }
+.bar-context { margin: 0; color: #cfe3d4; font-size: .85rem; line-height: 1.3; }
+.tabs {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 50; display: flex; margin: 0; padding: 0 0 env(safe-area-inset-bottom, 0px);
+  background: #fff; border-top: 1px solid #c4d3c4; box-shadow: 0 -2px 8px rgba(23, 63, 44, .12);
+}
+.tabs [role="tab"] {
+  flex: 1 1 0; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  min-height: 56px; padding: 6px 4px 4px; border-radius: 0; background: transparent; color: #5b6f61; font-size: .85rem; font-weight: 700; line-height: 1.2;
+}
+.tabs svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.tabs [role="tab"][aria-selected="true"] { background: #eef6ea; color: #14502a; }
+.tabs [role="tab"][aria-selected="true"] svg { fill: currentColor; fill-opacity: .3; }
+.tabs [role="tab"][aria-selected="true"]::before { content: ""; position: absolute; top: 0; left: 18%; right: 18%; height: 4px; border-radius: 0 0 4px 4px; background: #1d6b3f; }
+.modal-overlay { z-index: 100; }

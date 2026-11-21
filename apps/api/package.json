@@ -1,0 +1,39 @@
+{
+  "name": "@agrimatch/api",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:db": "vitest run --config vitest.db.config.ts",
+    "dev": "tsx watch src/server.ts",
+    "dev:worker": "tsx watch src/worker.ts",
+    "start": "node dist/server.js",
+    "start:worker": "node dist/worker.js",
+    "seed:demo": "tsx scripts/seed-demo.ts",
+    "acceptance:report": "tsx scripts/acceptance-report.ts",
+    "migrate": "node-pg-migrate -m ../../db/migrations --migrations-table pgmigrations --database-url-var DATABASE_URL"
+  },
+  "dependencies": {
+    "@aws-sdk/client-bedrock-runtime": "^3.1171.0",
+    "argon2": "^0.45.2",
+    "decimal.js": "^10.6.0",
+    "express": "^5.3.0",
+    "pg": "^8.23.1",
+    "pino": "^10.4.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.6.6",
+    "@types/pg": "^8.23.1",
+    "eslint": "^9.39.5",
+    "fast-check": "^4.10.2",
+    "node-pg-migrate": "^9.0.0",
+    "tsx": "^4.23.15",
+    "typescript": "^5.7.0",
+    "vitest": "^5.1.0"
+  }
+}

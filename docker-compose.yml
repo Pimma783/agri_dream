@@ -1,0 +1,23 @@
+name: agrimatch-mvp
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: agrimatch-postgres
+    # Come back after a host reboot (the container stopped on each shutdown before).
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: agrimatch
+      POSTGRES_PASSWORD: local-dev-only-password
+      POSTGRES_DB: agrimatch
+    ports:
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - agrimatch-pgdata:/var/lib/postgresql/data
+      - ./infra/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U agrimatch -d agrimatch"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+volumes:
+  agrimatch-pgdata:

@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>AgriCarbon Match</title>
+  <link rel="stylesheet" href="/style.css">
+  <script defer src="/app.js"></script>
+  <script defer src="/lot.js"></script>
+</head>
+<body>
+  <header>
+    <div class="bar"><span class="brand">AgriCarbon Match</span><span class="demo-badge">ข้อมูลจำลอง</span></div>
+    <p class="bar-context" id="bar-context" aria-live="polite">ค้นหาโรงงานรับซื้อ</p>
+  </header>
+  <main>
+    <div class="tab-panel" id="search-panel" role="tabpanel" aria-labelledby="tab-search">
+      <h1>ค้นหาโรงงานรับซื้อ</h1>
+      <p>เลือกวัสดุ ปริมาณ และจังหวัดจุดรับ เพื่อดูโรงงานที่ตรงเงื่อนไขในระยะไม่เกิน 80 กม.</p>
+      <form aria-label="ค้นหาโรงงาน" id="search" novalidate>
+        <div class="fields">
+          <label>ชนิดวัสดุ<select name="material" aria-describedby="material-error" required><option value="">เลือกชนิดวัสดุ</option></select><small id="material-error"></small></label>
+          <label>ปริมาณ (ตัน)<input name="quantity_tons" aria-describedby="quantity_tons-error" type="number" inputmode="decimal" step="any" min="0" placeholder="เช่น 2.5" required><small id="quantity_tons-error"></small></label>
+          <label>จังหวัดจุดรับ<select name="province" aria-describedby="province-error" required><option value="">เลือกจังหวัด</option></select><small id="province-error"></small></label>
+        </div>
+        <button id="submit" disabled>ค้นหาโรงงาน</button>
+      </form>
+      <p id="liff-status" role="status"></p>
+      <section aria-label="ผลค้นหา" aria-live="polite">
+        <p id="status"></p>
+        <button type="button" id="retry" hidden>ลองใหม่</button>
+        <ol id="results"></ol>
+      </section>
+    </div>
+    <div class="tab-panel" id="lot-panel" role="tabpanel" aria-labelledby="tab-lot" hidden>
+      <section id="lot-root" aria-label="วางแผนล็อต"></section>
+    </div>
+  </main>
+  <nav class="tabs" role="tablist" aria-label="เมนูหลัก">
+    <button type="button" class="tab" role="tab" id="tab-search" aria-selected="true" aria-controls="search-panel" data-context="ค้นหาโรงงานรับซื้อ"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg><span>ค้นหาโรงงาน</span></button>
+    <button type="button" class="tab" role="tab" id="tab-lot" aria-selected="false" aria-controls="lot-panel" tabindex="-1" data-context="วางแผนล็อต"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3 3 8l9 5 9-5-9-5Z"/><path d="m3 13 9 5 9-5"/></svg><span>วางแผนล็อต</span></button>
+  </nav>
+</body>
+</html>
