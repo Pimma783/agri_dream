@@ -10,6 +10,7 @@ import type { Actor } from '../domain/permissions.js';
 import { appError, err, ok, type ConversationService, type DraftService, type DraftView, type Result } from '../services/index.js';
 import type { Conversation } from '../services/index.js';
 import { ASSISTANT_SYSTEM, TEXT, buildRepairNotice, buildUserContent } from './prompts.js';
+import { tidyQuestions, tidyReplyText } from './reply-text.js';
 import { AssistantTurnSchema, type AssistantTurn, type DraftKind, parseModelJson } from './schemas.js';
 import {
   type DraftSummary, type MatchExplainPort, type ToolContext, type ToolDeps, type ToolName, type ToolOutcome,
@@ -83,8 +84,10 @@ export interface Assistant {
 export const DEFAULT_HISTORY_WINDOW = 12;
 const MAX_INPUT_CHARS = 2000;
 
+// Model-written text passes the deterministic Thai/no-repeat/max-two-questions filter (reply-text.ts).
+const MODEL_TEXT_TOOLS: ReadonlySet<ToolName> = new Set(['ask_user', 'answer_general', 'patch_draft']);
 const reply = (o: ToolOutcome): AssistantReply => ({
-  text: o.text,
+  text: MODEL_TEXT_TOOLS.has(o.tool) ? tidyReplyText(o.text) || TEXT.failClosed : o.text,
   tool: o.tool,
   ...(o.quickReplies ? { quickReplies: o.quickReplies } : {}),
   ...(o.draft ? { draft: o.draft } : {}),
@@ -190,11 +193,17 @@ export function createAssistant(deps: AssistantDeps): Assistant {
     if (m.kind === 'invalid') return finish(reply({ tool: 'ask_user', text: TEXT.failClosed, noWrite: true }));
 
     const ctx: ToolContext = { actor: assistantActor, conversation, activeDraft, userText: text, history };
-    const tool = selectTool(m.turn);
+    const questions = tidyQuestions(m.turn.questions);
+    const turn: AssistantTurn = {
+      ...m.turn,
+      reply_text: tidyReplyText(m.turn.reply_text),
+      ...(questions ? { questions } : {}),
+    };
+    const tool = selectTool(turn);
     let outcome: ToolOutcome;
     switch (tool) {
       case 'patch_draft':
-        outcome = await patchDraft(toolDeps, ctx, m.turn);
+        outcome = await patchDraft(toolDeps, ctx, turn);
         break;
       case 'explain_matches':
         outcome = await explainMatches(toolDeps, ctx);
@@ -203,10 +212,10 @@ export function createAssistant(deps: AssistantDeps): Assistant {
         outcome = await showStatus(toolDeps, ctx);
         break;
       case 'answer_general':
-        outcome = answerGeneral(m.turn);
+        outcome = answerGeneral(turn);
         break;
       case 'ask_user':
-        outcome = askUser(m.turn);
+        outcome = askUser(turn);
         break;
     }
     return finish(reply(outcome));

@@ -34,6 +34,9 @@ export const ASSISTANT_SYSTEM = [
   '5. If a baler could mean buying material (PURCHASE_DEMAND) or offering a baling service (BALING_SERVICE), use intent CLARIFY with no draft_patch.',
   '6. Do not invent prices, buyers, distances or savings. Use FIND_BALER or CHECK_STATUS to show matches and status; the system renders the numbers.',
   '7. Use only the active draft in <context>. Other organizations\' data does not exist for you.',
+  '8. reply_text and questions must be Thai only. Never show internal codes or field names to the user: not FIXED, NEGOTIABLE, RICE_STRAW, CANE_LEAF, CORN_COB, KG, TON, and not keys such as qty_kg or price_mode.',
+  '   Say ราคาตายตัว or ต่อรองได้, ฟางข้าว, กก. or ตัน instead. The English codes are only for the JSON in draft_patch.',
+  '9. Keep reply_text short, about 2-4 lines. Ask for at most two missing items per reply, and never repeat the same question or sentence.',
 ].join('\n');
 
 /** Escape so user text cannot close or forge a delimiter. */

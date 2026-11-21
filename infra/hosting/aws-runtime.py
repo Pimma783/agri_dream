@@ -396,6 +396,15 @@ def build_status():
         print('Verified cloud image:', STATE['image_uri'], flush=True)
 
 
+def migrations_hash():
+    """SHA-256 over the names and contents of every file under db/migrations (sorted, length-framed)."""
+    folder = ROOT / 'db' / 'migrations'
+    digest = hashlib.sha256()
+    for path in sorted((p for p in folder.rglob('*') if p.is_file()), key=lambda p: p.relative_to(folder).as_posix()):
+        name = path.relative_to(folder).as_posix().encode()
+        body = path.read_bytes()
+        digest.update(len(name).to_bytes(8, 'big') + name + len(body).to_bytes(8, 'big') + body)
+    return digest.hexdigest()
 def migrate():
     result = aws('ecs', 'run-task', {'cluster': STATE['cluster'], 'taskDefinition': STATE['task_migrate'],
         'launchType': 'FARGATE', 'platformVersion': 'LATEST', 'count': 1,
@@ -403,6 +412,8 @@ def migrate():
     if result.get('failures') or not result.get('tasks'):
         raise RuntimeError('Migration task placement failed.')
     STATE['migration_task'] = result['tasks'][0]['taskArn']
+    # publish compares this with the local db/migrations to skip a repeat migration when nothing changed.
+    STATE['migration_files_hash'] = migrations_hash()
     save()
     print('Migration task started. Inspect task completion before publishing.', flush=True)
 
@@ -549,9 +560,20 @@ def publish():
                     'Action': 'elasticloadbalancing:ModifyRule', 'Resource': STATE['gateway_rule']}]})})
     if 'migration_task' not in STATE:
         raise RuntimeError('Run the migration task first.')
+    current = migrations_hash()
     tasks = aws('ecs', 'describe-tasks', {'cluster': STATE['cluster'], 'tasks': [STATE['migration_task']]})['tasks']
-    if not tasks or tasks[0]['lastStatus'] != 'STOPPED' or tasks[0]['containers'][0].get('exitCode') != 0:
-        raise RuntimeError('Migration has not completed successfully; refusing deployment.')
+    if tasks:
+        task = tasks[0]
+        if task['lastStatus'] != 'STOPPED' or task['containers'][0].get('exitCode') != 0:
+            raise RuntimeError('Migration has not completed successfully; refusing deployment.')
+        # Remember the verified success: ECS forgets stopped tasks after about an hour.
+        STATE['migration_ok_hash'] = STATE.get('migration_files_hash')
+        save()
+    elif STATE.get('migration_ok_hash') is None:
+        raise RuntimeError('Last migration task is no longer known to ECS and no verified success is recorded; run migrate.')
+    # The successful migration must have run with the same set of db/migrations files (names and contents).
+    if STATE.get('migration_ok_hash') != current:
+        raise RuntimeError('db/migrations changed since the last successful migration; run the migration task first.')
     if 'service_arn' not in STATE:
         result = aws('ecs', 'create-express-gateway-service', {'serviceName': PREFIX, 'cluster': STATE['cluster'],
             'taskDefinitionArn': STATE['task_app'], 'infrastructureRoleArn': STATE['infrastructure_role'],

@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, render, screen, within } from '@testing-library/react';
 import { matchListSchema, type MatchView } from '@agrimatch/contracts';
 import { MatchCards, MatchDetail } from '@/components/match-views';
-import { findMatch, flagChipText, offerHref } from '@/lib/matches';
+import { coverageText, findMatch, flagChipText, offerHref } from '@/lib/matches';
 import { navForRole } from '@/lib/nav';
 
 vi.mock('next/link', () => ({
@@ -33,7 +33,9 @@ function match(over: Partial<MatchView> = {}): MatchView {
     missing_components: ['price'],
     flags: [
       { code: 'INCOMPLETE', label_th: 'ข้อมูลไม่ครบ' },
-      { code: 'NEEDS_CONFIRMATION', field: 'moisture_max_pct', label_th: 'x' },
+      { code: 'NEEDS_CONFIRMATION', field: 'form', label_th: 'x' },
+      { code: 'NEEDS_CONFIRMATION', field: 'window', label_th: 'x' },
+      { code: 'NEEDS_CONFIRMATION', field: 'mystery_code', label_th: 'x' },
       { code: 'DISTANCE_UNVERIFIED', label_th: 'x' },
       { code: 'PRICE_MISMATCH', label_th: 'x' },
     ],
@@ -70,8 +72,14 @@ describe('MatchCards', () => {
     expect(within(card).getByText('86.5 / 100')).toBeTruthy();
     expect(within(card).getByText('ข้อมูลไม่ครบ')).toBeTruthy();
     expect(within(card).getByText('ราคาไม่ตรง')).toBeTruthy();
-    expect(within(card).getByText('ระยะเส้นตรง ไม่ใช่ระยะขับรถ')).toBeTruthy();
-    expect(within(card).getByText(/ต้องสอบถาม\/ตรวจเพิ่ม: ความชื้นสูงสุด|ต้องสอบถาม\/ตรวจเพิ่ม: moisture_max_pct/)).toBeTruthy();
+    // DISTANCE_UNVERIFIED chip (the old chip wording is now only the label beside a distance value).
+    expect(within(card).getByText('ยังยืนยันระยะทางไม่ได้')).toBeTruthy();
+    expect(within(card).getByText('ระยะเส้นตรง ไม่ใช่ระยะขับรถ: 12.30 กม.')).toBeTruthy();
+    expect(within(card).getByText('ต้องสอบถาม/ตรวจเพิ่ม: รูปแบบวัสดุ')).toBeTruthy();
+    expect(within(card).getByText('ต้องสอบถาม/ตรวจเพิ่ม: ช่วงวันที่')).toBeTruthy();
+    expect(within(card).getByText('ต้องสอบถาม/ตรวจเพิ่ม: ข้อมูลบางรายการ')).toBeTruthy();
+    expect(card.textContent).not.toMatch(/: (form|window|mystery_code)/);
+    expect(within(card).getByTestId('weight-coverage').textContent).toBe('คิดจากข้อมูล 80%');
     expect(card.textContent).toContain('อุตรดิตถ์');
     expect(card.textContent).not.toMatch(/โทร|tel:|@|LINE/);
     const link = within(card).getByRole('link', { name: 'ดูรายละเอียด' });
@@ -89,6 +97,9 @@ describe('MatchCards', () => {
 describe('MatchDetail', () => {
   it('shows reasons, component breakdown, missing data, disclaimer and the offer link', () => {
     render(<MatchDetail m={match()} />);
+    expect(screen.getByText('5,000 กก. (5 ตัน)')).toBeTruthy();
+    expect(screen.getByText('1,200 บาท/ตัน')).toBeTruthy();
+    expect(screen.getByTestId('weight-coverage').textContent).toBe('คิดจากข้อมูล 80%');
     expect(screen.getByText('ระยะเส้นตรง 12.3 กม. (ไม่ใช่ระยะขับรถ)')).toBeTruthy();
     expect(screen.getByTestId('weights-disclaimer').textContent).toContain('ค่าเริ่มต้นสำหรับทดสอบเดโม');
     const dist = document.querySelector('[data-component="distance"]') as HTMLElement;
@@ -106,7 +117,23 @@ describe('helpers and nav', () => {
   it('builds hrefs, finds matches and falls back to the raw field key', () => {
     expect(offerHref('a b')).toBe('/offers/new?match_id=a%20b');
     expect(findMatch([match()], 'zz')).toBeUndefined();
-    expect(flagChipText({ code: 'NEEDS_CONFIRMATION', field: 'foo', label_th: '' })).toBe('ต้องสอบถาม/ตรวจเพิ่ม: foo');
+    expect(flagChipText({ code: 'NEEDS_CONFIRMATION', field: 'foo', label_th: '' })).toBe('ต้องสอบถาม/ตรวจเพิ่ม: ข้อมูลบางรายการ');
+    expect(flagChipText({ code: 'NEEDS_CONFIRMATION', label_th: '' })).toBe('ต้องสอบถาม/ตรวจเพิ่ม: ข้อมูลบางรายการ');
+    for (const [k, th] of [['form', 'รูปแบบวัสดุ'], ['window', 'ช่วงวันที่'], ['area', 'พื้นที่'], ['price', 'ราคา'], ['quantity', 'ปริมาณ']] as const) {
+      expect(flagChipText({ code: 'NEEDS_CONFIRMATION', field: k, label_th: '' })).toBe(`ต้องสอบถาม/ตรวจเพิ่ม: ${th}`);
+    }
+    expect(flagChipText({ code: 'DISTANCE_UNVERIFIED', label_th: '' })).toBe('ยังยืนยันระยะทางไม่ได้');
+  });
+  it('shows coverage only when below 1, from the decimal string', () => {
+    expect(coverageText('0.8000')).toBe('80%');
+    expect(coverageText('0.9999')).toBe('99%');
+    expect(coverageText('0.5')).toBe('50%');
+    expect(coverageText('1.0000')).toBeNull();
+    expect(coverageText(null)).toBeNull();
+    render(<MatchCards items={[match({ weight_coverage: '1.0000' })]} />);
+    expect(screen.queryByTestId('weight-coverage')).toBeNull();
+    expect(screen.getByTestId('estimate-label')).toBeTruthy();
+    expect(screen.getByTestId('demo-weights-label')).toBeTruthy();
   });
 
   it('marks /matches ready for factory and baler', () => {

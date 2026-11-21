@@ -10,6 +10,7 @@ import {
 } from '@agrimatch/contracts';
 import type { ApiCore } from './api-core';
 import { browserApi } from './api';
+import { formatDecimal } from './format';
 import { formatDate } from './format';
 import { dayStart, NEGOTIABLE_LABEL } from './postings';
 import { qtyToKg } from './offers';
@@ -119,7 +120,7 @@ export function buildResalePatch(f: ResaleFormState, maxKg: string): ResalePatch
   if (qty !== '') {
     const kg = qtyToKg(qty, f.qtyUnit);
     if (kg === null || toMilli(kg) <= 0n) errors.quantity = 'ปริมาณต้องเป็นตัวเลขมากกว่า 0';
-    else if (exceeds(kg, maxKg)) errors.quantity = `ปริมาณเกินที่จองไว้ ขายต่อได้ไม่เกิน ${Number(maxKg).toLocaleString('th-TH')} กก.`;
+    else if (exceeds(kg, maxKg)) errors.quantity = `ปริมาณเกินที่จองไว้ ขายต่อได้ไม่เกิน ${formatDecimal(maxKg)} กก.`;
     else patch.quantity = { value: qty, unit: f.qtyUnit };
   }
   if (f.form !== '') patch.material_form = f.form;

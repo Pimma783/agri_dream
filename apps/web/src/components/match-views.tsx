@@ -3,10 +3,12 @@ import type { MatchView } from '@agrimatch/contracts';
 import { BUTTON_CLASS, Card, CardList, Field } from '@/components/cards';
 import { DemoWeightsLabel, EstimateLabel } from '@/components/labels';
 import { PendingMaterial } from '@/components/pending-material';
-import { formatKg } from '@/lib/format';
+import { formatDecimal, formatKg } from '@/lib/format';
 import {
   COMPONENT_LABEL,
   counterpartyName,
+  coverageText,
+  DISTANCE_LABEL_TH,
   ENTITY_LABEL,
   flagChipText,
   fractionPct,
@@ -46,6 +48,7 @@ function TierBadge({ tier }: { tier: 0 | 1 }) {
 
 /** Score with its two required labels: estimate, and default weights for the demo. */
 export function ScoreBlock({ m }: { m: MatchView }) {
+  const coverage = coverageText(m.weight_coverage);
   return (
     <div data-testid="match-score" className="rounded-lg border border-dashed border-amber-400 bg-amber-50 p-3">
       <div className="flex flex-wrap items-center gap-2">
@@ -54,6 +57,7 @@ export function ScoreBlock({ m }: { m: MatchView }) {
         <DemoWeightsLabel />
       </div>
       <p className="mt-1 text-lg font-semibold text-slate-900">{scoreText(m.score)} / 100</p>
+      {coverage ? <p data-testid="weight-coverage" className="text-sm text-slate-700">คิดจากข้อมูล {coverage}</p> : null}
     </div>
   );
 }
@@ -67,7 +71,7 @@ export function MatchCards({ items }: { items: MatchView[] }) {
             {ENTITY_LABEL[m.counterparty.entity_type]} · {m.counterparty.province ?? 'ไม่ระบุจังหวัด'}
           </p>
           <ScoreBlock m={m} />
-          {m.distance ? <p>{m.distance.label_th}: {m.distance.km} กม.</p> : null}
+          {m.distance ? <p>{DISTANCE_LABEL_TH}: {m.distance.km} กม.</p> : null}
           <PendingMaterial data={m.counterparty.published} />
           <FlagChips flags={m.flags} />
           {m.reasons[0] ? <p>{m.reasons[0].text_th}</p> : null}
@@ -85,7 +89,7 @@ function PublishedFields({ published }: { published: Record<string, unknown> }) 
   const qty = published.remaining_qty_kg ?? published.qty_kg ?? published.capacity_kg;
   if (typeof qty === 'string') rows.push(['ปริมาณ', formatKg(qty)]);
   const price = published.unit_price_thb ?? published.max_unit_price_thb;
-  if (typeof price === 'string') rows.push(['ราคาที่ประกาศ', `${price} บาท/${published.price_unit === 'ton' || published.price_unit === 'TON' ? 'ตัน' : 'กก.'}`]);
+  if (typeof price === 'string') rows.push(['ราคาที่ประกาศ', `${formatDecimal(price)} บาท/${published.price_unit === 'ton' || published.price_unit === 'TON' ? 'ตัน' : 'กก.'}`]);
   if (rows.length === 0) return null;
   return (
     <>
@@ -110,7 +114,7 @@ export function MatchDetail({ m }: { m: MatchView }) {
           <Field label="จังหวัด">{m.counterparty.province ?? 'ไม่ระบุ'}</Field>
           <PublishedFields published={m.counterparty.published} />
           <PendingMaterial data={m.counterparty.published} />
-          {m.distance ? <Field label={m.distance.label_th}>{m.distance.km} กม.</Field> : null}
+          {m.distance ? <Field label={DISTANCE_LABEL_TH}>{m.distance.km} กม.</Field> : null}
         </dl>
         <p data-testid="no-contact-notice" className="text-xs text-slate-600">{NO_CONTACT_NOTICE}</p>
       </section>

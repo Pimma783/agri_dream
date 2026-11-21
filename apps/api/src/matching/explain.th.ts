@@ -21,12 +21,27 @@ const p = (r: Reason, k: string): string => {
   return v === null || v === undefined ? '-' : String(v);
 };
 
+/** Decimal string -> "5,000" (th-TH grouping, no trailing zeros). String math, no floats. Non-decimals pass through. */
+function groupKg(v: string): string {
+  const m = /^(\d+)(?:\.(\d+))?$/.exec(v);
+  if (!m) return v;
+  const int = (m[1] ?? '0').replace(/^0+(?=\d)/, '').replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  const frac = (m[2] ?? '').replace(/0+$/, '');
+  return frac ? `${int}.${frac}` : int;
+}
+const NEEDS_FIELD_TH: Readonly<Record<string, string>> = {
+  form: 'รูปแบบวัสดุ',
+  window: 'ช่วงวันที่',
+  area: 'พื้นที่',
+  price: 'ราคา',
+  quantity: 'ปริมาณ',
+};
 export function renderReasonTh(r: Reason): string {
   switch (r.code) {
     case 'DISTANCE_KM':
       return `ระยะเส้นตรง ${p(r, 'km')} กม. (ไม่ใช่ระยะขับรถ)`;
     case 'QTY_COVERAGE':
-      return `ปริมาณครอบคลุม ${p(r, 'coveragePct')}% (ฝั่งเสนอ ${p(r, 'supplyKg')} กก. ฝั่งรับ ${p(r, 'demandKg')} กก.)`;
+      return `ปริมาณครอบคลุม ${p(r, 'coveragePct')}% (ฝั่งเสนอ ${groupKg(p(r, 'supplyKg'))} กก. ฝั่งรับ ${groupKg(p(r, 'demandKg'))} กก.)`;
     case 'PRICE_WITHIN_BUDGET':
       return `ราคา ${p(r, 'askThbPerKg')} บาท/กก. ไม่เกินงบ ${p(r, 'maxThbPerKg')} บาท/กก.`;
     case 'PRICE_ABOVE_BUDGET':
@@ -50,7 +65,7 @@ export function renderReasonsTh(reasons: readonly Reason[]): string[] {
 export function renderFlagTh(f: Flag): string {
   switch (f.code) {
     case 'NEEDS_CONFIRMATION':
-      return `ต้องสอบถาม/ตรวจเพิ่ม: ${f.field}`;
+      return `ต้องสอบถาม/ตรวจเพิ่ม: ${NEEDS_FIELD_TH[f.field] ?? 'ข้อมูลบางรายการ'}`;
     case 'INCOMPLETE':
       return 'ข้อมูลไม่ครบ';
     case 'PRICE_MISMATCH':

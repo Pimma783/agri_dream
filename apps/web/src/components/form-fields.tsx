@@ -151,14 +151,15 @@ export function AmountInput<U extends string>(props: {
           disabled={disabled}
           onChange={(e) => onAmount(e.target.value)}
           aria-invalid={error ? true : undefined}
-          className={`${INPUT} flex-1`}
+          className={`${INPUT} flex-1 basis-0`}
         />
         <select
           aria-label={`${label} หน่วย`}
           value={unit}
           disabled={disabled}
           onChange={(e) => onUnit(e.target.value as U)}
-          className={`${INPUT} w-auto shrink-0`}
+          // Fixed width: INPUT carries w-full, which would otherwise win over w-auto and squeeze the number box to 0.
+          className={`${INPUT.replace('w-full', 'w-28')} shrink-0`}
         >
           {units.map((u) => (
             <option key={u.value} value={u.value}>
