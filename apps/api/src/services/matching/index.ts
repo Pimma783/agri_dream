@@ -9,7 +9,7 @@ import type {
   DemandSubject, Material, MatchResult, Price, PriceUnit, Route, SupplySubject, TimeWindow, TransportResponsibility,
 } from '../../matching/types.js';
 import {
-  balingRequests, balingServices, demands, listings, matches, organizations,
+  balingRequests, balingServices, demands, listings, matches, notifications, organizations,
   type BalingRequest, type BalingService, type Db, type Demand, type Listing,
 } from '../../repos/index.js';
 import { auditSystem } from '../audit.js';
@@ -17,6 +17,8 @@ import { inTransaction, nowOf, type ServiceContext } from '../context.js';
 import { appError } from '../errors.js';
 import { ok, err, type Result } from '../result.js';
 import type { MatchEntityType } from '../recompute.js';
+import { notifyNewPair, notifyPublishResult } from './farmer-notify.js';
+import { newMatchNotificationText } from './notify.js';
 
 const PayloadSchema = z
   .object({
@@ -112,6 +114,22 @@ export function createMatchingService(ctx: ServiceContext): MatchingService {
     return cache.get(id) ?? null;
   }
 
+  /** Notify the Dashboard side of a pair that did not exist before this run. At most once per pair (unique key). */
+  async function notifyNewMatch(db: Db, r: MatchResult, matchId: string): Promise<void> {
+    const demandOrg = r.route === 3
+      ? (await balingServices.get(db, r.demandId))?.org_id
+      : (await demands.get(db, r.demandId))?.org_id;
+    if (!demandOrg) return;
+    const s = r.route === 3
+      ? await balingRequests.get(db, r.supplyId).then((x) => (x ? { materialType: x.material_type, qtyKg: x.qty_kg, province: x.province } : null))
+      : await listings.get(db, r.supplyId).then((x) => (x ? { materialType: x.material_type, qtyKg: x.remaining_qty_kg, province: x.province } : null));
+    if (!s) return;
+    await notifications.insertIfAbsent(db, {
+      org_id: demandOrg, kind: 'NEW_MATCH', route: r.route, supply_id: r.supplyId, demand_id: r.demandId,
+      ...newMatchNotificationText(r.route, s), link_path: `/matches/${matchId}`,
+    });
+  }
+
   async function run(db: Db, type: MatchEntityType, id: string, now: Date): Promise<RecomputeSummary> {
     const kinds = new Map<string, string | null>();
     const open = (status: string, remaining: string | null) => status === 'PUBLISHED' && (remaining === null || new D(remaining).greaterThan(0));
@@ -188,12 +206,31 @@ export function createMatchingService(ctx: ServiceContext): MatchingService {
     let upserted = 0;
     for (const r of pairs) {
       const m = meta.get(keyOf(r.route, r.supplyId, r.demandId))!;
-      await matches.upsert(db, {
+      const isNew = !(await matches.pairExists(db, r.route, r.supplyId, r.demandId));
+      const row = await matches.upsert(db, {
         route: r.route, supply_id: r.supplyId, demand_id: r.demandId, rule_version: r.ruleVersion, score: r.score,
         weight_coverage: r.weightCoverage, components: r.components, flags: r.flags, reasons: r.reasons,
         distance_km: r.distanceKm, supply_version: m.sv, demand_version: m.dv, tier: r.tier, is_demo: m.demo,
       });
       upserted += 1;
+      if (isNew && row) await notifyNewMatch(db, r, row.id);
+      // A new pair found from the buyer side (a demand posted later) tells the farmer once. A listing-side run is covered by the result push below.
+      if (isNew && row && scope.side === 'demand' && (r.route === 1 || r.route === 2)) {
+        const l = await listings.get(db, r.supplyId);
+        if (l && l.kind === 'SALE') await notifyNewPair(db, l, r.demandId, r.distanceKm);
+      }
+    }
+    // One result push per listing version, after its matches are known.
+    if (entityListing && entityListing.kind === 'SALE') {
+      const own = pairs.filter((p) => p.route === 1 || p.route === 2);
+      const orgs = new Set<string>();
+      let nearest: string | null = null;
+      for (const p of own) {
+        const d = await demands.get(db, p.demandId);
+        if (d) orgs.add(d.org_id);
+        if (p.distanceKm !== null && (nearest === null || new D(p.distanceKm).lessThan(nearest))) nearest = p.distanceKm;
+      }
+      await notifyPublishResult(db, entityListing, { buyers: orgs.size, nearestKm: nearest });
     }
     // Rows of this entity that were not produced by this run no longer pass the filters, or the entity is closed.
     let removed = 0;

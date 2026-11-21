@@ -23,8 +23,8 @@ function match(over: Partial<MatchView> = {}): MatchView {
     tier: 1,
     score: '86.50',
     score_label_th: 'ประมาณการ',
-    weights_label_th: 'ค่าเริ่มต้นสำหรับเดโม',
-    weights_disclaimer_th: 'น้ำหนักคะแนนเป็นค่าเริ่มต้นสำหรับทดสอบเดโม ไม่ใช่สูตรที่พิสูจน์ว่าดีที่สุด',
+    weights_label_th: 'น้ำหนักคะแนนเริ่มต้น',
+    weights_disclaimer_th: 'น้ำหนักคะแนนเป็นค่าเริ่มต้นสำหรับทดสอบ ไม่ใช่สูตรที่พิสูจน์ว่าดีที่สุด',
     weight_coverage: '0.8000',
     components: {
       distance: { value: '0.9000', weight: '0.3000' },
@@ -68,7 +68,7 @@ describe('MatchCards', () => {
     render(<MatchCards items={[match()]} />);
     const card = within(screen.getByRole('list', { name: 'ผลจับคู่' })).getAllByRole('listitem')[0] as HTMLElement;
     expect(within(card).getByTestId('estimate-label').textContent).toBe('ประมาณการ');
-    expect(within(card).getByTestId('demo-weights-label').textContent).toBe('ค่าเริ่มต้นสำหรับเดโม');
+    expect(within(card).getByTestId('demo-weights-label').textContent).toBe('น้ำหนักคะแนนเริ่มต้น');
     expect(within(card).getByText('86.5 / 100')).toBeTruthy();
     expect(within(card).getByText('ข้อมูลไม่ครบ')).toBeTruthy();
     expect(within(card).getByText('ราคาไม่ตรง')).toBeTruthy();
@@ -101,7 +101,7 @@ describe('MatchDetail', () => {
     expect(screen.getByText('1,200 บาท/ตัน')).toBeTruthy();
     expect(screen.getByTestId('weight-coverage').textContent).toBe('คิดจากข้อมูล 80%');
     expect(screen.getByText('ระยะเส้นตรง 12.3 กม. (ไม่ใช่ระยะขับรถ)')).toBeTruthy();
-    expect(screen.getByTestId('weights-disclaimer').textContent).toContain('ค่าเริ่มต้นสำหรับทดสอบเดโม');
+    expect(screen.getByTestId('weights-disclaimer').textContent).toContain('ค่าเริ่มต้นสำหรับทดสอบ');
     const dist = document.querySelector('[data-component="distance"]') as HTMLElement;
     expect(dist.textContent).toContain('90%');
     expect(dist.textContent).toContain('น้ำหนัก 30%');

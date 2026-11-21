@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import type { MeResponse } from '@agrimatch/contracts';
 import { navForRole, ROLE_LABEL_TH } from '@/lib/nav';
 import { BottomNav } from './bottom-nav';
+import { NotificationBell } from './notification-bell';
 
 /** Compact top bar (org and role) plus bottom navigation. Content stays within 360 px. */
 export function AppShell({ me, children }: { me: Pick<MeResponse, 'org_name' | 'role'>; children: ReactNode }) {
@@ -12,6 +13,7 @@ export function AppShell({ me, children }: { me: Pick<MeResponse, 'org_name' | '
         <span className="min-w-0 truncate text-sm text-slate-600" data-testid="org-line">
           {me.org_name} · {ROLE_LABEL_TH[me.role]}
         </span>
+        {me.role === 'FARMER' ? null : <NotificationBell />}
       </header>
       <main className="mx-auto w-full max-w-3xl min-w-0 flex-1 px-4 pb-24 pt-4 sm:pb-6">{children}</main>
       <BottomNav items={navForRole(me.role)} />

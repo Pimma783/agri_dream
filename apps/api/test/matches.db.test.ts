@@ -96,7 +96,7 @@ describe.skipIf(!testDatabaseUrl)('GET /matches (real Postgres)', () => {
       expect(m.own_entity_id).toBe(listingId);
       expect(m.counterparty.entity_type).toBe('DEMAND');
       expect(m.score_label_th).toBe('ประมาณการ');
-      expect(m.weights_label_th).toBe('ค่าเริ่มต้นสำหรับเดโม');
+      expect(m.weights_label_th).toBe('น้ำหนักคะแนนเริ่มต้น');
       expect(m.rule_version).toMatch(/^rules-/);
       expect(m.reasons.length).toBeGreaterThan(0);
       expect(m.reasons.every((x: { text_th: string }) => x.text_th.length > 0)).toBe(true);

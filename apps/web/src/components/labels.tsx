@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 
 export const ESTIMATE_TEXT = 'ประมาณการ';
-export const DEMO_DEFAULT_TEXT = 'ค่าเริ่มต้นสำหรับเดโม';
+export const DEMO_DEFAULT_TEXT = 'น้ำหนักคะแนนเริ่มต้น';
 export const IMAGE_DISCLAIMER_TEXT = 'การประเมินเบื้องต้นจากภาพ ไม่ใช่ผลตรวจคุณภาพจริง';
 
 /** Label for any number the system estimated or calculated. */

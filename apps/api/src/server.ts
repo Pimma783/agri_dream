@@ -12,6 +12,7 @@ import { mountMatchRoutes } from './http/match-routes.js';
 import { mountOfferRoutes } from './http/offer-routes.js';
 import { mountAgreementRoutes } from './http/agreement-routes.js';
 import { mountResaleRoutes } from './http/resale-routes.js';
+import { mountNotificationRoutes } from './http/notification-routes.js';
 import { createAssessmentService, createJobQueue } from './services/index.js';
 
 let env;
@@ -48,6 +49,7 @@ const app = createApp({ env, logger, auth, webhooks, mountRoutes: pool && assess
     mountOfferRoutes(a, { pool, logger }); // offers (8.7)
     mountAgreementRoutes(a, { pool, logger }); // agreements, parties only (8.7)
     mountResaleRoutes(a, { pool, logger }); // POST /agreements/:id/resale-draft (16.1)
+    mountNotificationRoutes(a, { pool, logger }); // in-app bell (23.1)
     mountLineLinkRoutes(a, pool, env); // LINE link codes and status (11.2)
   } : undefined });
 

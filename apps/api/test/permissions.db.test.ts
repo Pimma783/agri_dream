@@ -11,7 +11,7 @@ import {
 import { agreements, balingRequests, balingServices, conversations, drafts, lineIdentities } from '../src/repos/index.js';
 import {
   createAgreementReadService, createAssessmentService, createBalingRequestService, createBalingServiceService, createConversationService,
-  createDemandService, createDraftService, createJobQueue, createListingService, createMatchReadService, createMediaService,
+  createDemandService, createDraftService, createJobQueue, createListingService, createMatchReadService, createMediaService, createNotificationService,
   createOfferService, createResaleService, DbMediaStore, type DraftKind, MediaServiceError, ok, type Result,
 } from '../src/services/index.js';
 import { createLineIdentityService, LINK_FAILURE_MESSAGE_TH } from '../src/services/identity/index.js';
@@ -439,6 +439,33 @@ describe.skipIf(!testDatabaseUrl)('permissions across services (real Postgres)',
       async make() { return { related: 'ALL', run: (a) => createMatchReadService({ pool }).list(a) }; },
     },
   ];
+  const notifications$ = () => createNotificationService({ pool });
+  const notificationOps = (): Op[] => {
+    return [
+      {
+        id: 'notifications:list', service: 'notifications', capability: 'DASHBOARD_MANAGE', readOnly: true,
+        async make() { return { related: 'ALL', run: (a) => notifications$().list(a) }; },
+      },
+      // Both mutations are scoped to the actor's own organization; an id from another org is NOT_FOUND, never a state change.
+      {
+        id: 'notifications:read-all', service: 'notifications', capability: 'DASHBOARD_MANAGE',
+        async make() { return { related: 'ALL', run: (a) => notifications$().markAllRead(a) }; },
+      },
+      {
+        id: 'notifications:read', service: 'notifications', capability: 'DASHBOARD_MANAGE',
+        async make(m) {
+          if (m) return { related: [], run: (a) => notifications$().markRead(a, randomUUID()) };
+          const { rows } = await pool.query<{ id: string }>(
+            `INSERT INTO notifications (org_id, kind, route, supply_id, demand_id, title_th, body_th, link_path)
+             VALUES ($1,'NEW_MATCH',1,$2,$3,'t','b','/matches/x') RETURNING id`,
+            [P.factoryA.org.id, randomUUID(), randomUUID()],
+          );
+          const id = rows[0]!.id;
+          return { related: [P.factoryA.org.id], run: (a) => notifications$().markRead(a, id) };
+        },
+      },
+    ];
+  };
   function allOps(): Op[] {
     const kinds: DraftKind[] = ['SALE_LISTING', 'RESALE_LISTING', 'PURCHASE_DEMAND', 'BALING_SERVICE', 'BALING_REQUEST'];
     return [
@@ -457,6 +484,7 @@ describe.skipIf(!testDatabaseUrl)('permissions across services (real Postgres)',
       ...mediaOps(),
       ...conversationOps(),
       ...matchOps(),
+      ...notificationOps(),
     ];
   }
 
@@ -489,7 +517,7 @@ describe.skipIf(!testDatabaseUrl)('permissions across services (real Postgres)',
       'media:upload-draft', 'media:upload-listing', 'media:url', 'media:content', 'media:delete',
       'assessment:upload-draft', 'assessment:upload-listing', 'assessment:get',
       'conversations:open', 'conversations:get', 'conversations:recent', 'conversations:append', 'conversations:setActiveDraft',
-      'matches:list',
+      'matches:list', 'notifications:list', 'notifications:read-all', 'notifications:read',
     );
     return names;
   })();

@@ -220,7 +220,7 @@ def register(image):
         'API_INTERNAL_URL': 'http://127.0.0.1:4000', 'WEB_ORIGIN': STATE.get('url', 'https://localhost.invalid'),
         'LINE_FARMER_BASIC_ID': '@642ctpqm', 'LINE_BALER_BASIC_ID': '@237ozbsh', 'LINE_FACTORY_BASIC_ID': '@241sxehz'}
     secret_keys = ['DATABASE_URL', 'SESSION_SECRET'] + [f'LINE_{r}_{s}' for r in ('FARMER','BALER','FACTORY') for s in ('CHANNEL_SECRET','ACCESS_TOKEN')]
-    modes = ['app', 'worker', 'migrate', 'verify'] + (['seed'] if STATE.get('seed_execution_role') else []) + (
+    modes = ['app', 'worker', 'migrate', 'verify'] + (['seed', 'retire-demo'] if STATE.get('seed_execution_role') else []) + (
         ['account'] if STATE.get('owner_secret_arn') else [])
     for mode in modes:
         bindings = [{'name': k, 'valueFrom': f'{STATE["secret_arn"]}:{"MIGRATION_DATABASE_URL" if mode == "migrate" and k == "DATABASE_URL" else k}::'} for k in secret_keys]
@@ -228,6 +228,11 @@ def register(image):
             bindings.append({'name': 'APP_DATABASE_PASSWORD', 'valueFrom': f'{STATE["secret_arn"]}:APP_DATABASE_PASSWORD::'})
         task_env = dict(env)
         execution_role = STATE['execution_role']
+        if mode == 'retire-demo':
+            # Only the app role's DATABASE_URL. No demo passwords, LINE or session values.
+            bindings = [{'name': 'DATABASE_URL', 'valueFrom': f'{STATE["secret_arn"]}:DATABASE_URL::'}]
+            task_env = {'NODE_ENV': 'production', 'AWS_REGION': REGION, 'SEED_DEMO_CONFIRM': 'yes'}
+            execution_role = STATE['seed_execution_role']
         if mode == 'seed':
             # Only the app role's DATABASE_URL, plus the demo passwords from their own secret. No LINE or session values.
             bindings = [{'name': 'DATABASE_URL', 'valueFrom': f'{STATE["secret_arn"]}:DATABASE_URL::'}] + [
@@ -253,7 +258,7 @@ def register(image):
             'tags': [{'key': t['Key'], 'value': t['Value']} for t in TAGS]}
         if mode == 'app':
             definition['containerDefinitions'][0]['portMappings'] = [{'name': 'http', 'containerPort': 8080, 'protocol': 'tcp'}]
-        STATE[f'task_{mode}'] = aws('ecs', 'register-task-definition', definition)['taskDefinition']['taskDefinitionArn']
+        STATE[f'task_{mode.replace("-", "_")}'] = aws('ecs', 'register-task-definition', definition)['taskDefinition']['taskDefinitionArn']
         save()
     STATE['image'] = image
     save()
@@ -545,6 +550,39 @@ def seed_status():
         print(event['message'], flush=True)
 
 
+def retire_demo():
+    """Starts the one-off task that closes the demo seed's postings (never deletes, never touches accounts)."""
+    if 'task_retire_demo' not in STATE:
+        raise RuntimeError('Run seed-setup, then register the image again, before retiring demo postings.')
+    group = f'/agrimatch/{PREFIX}/retire-demo'
+    existing = aws('logs', 'describe-log-groups', {'logGroupNamePrefix': group})['logGroups']
+    if not any(g['logGroupName'] == group for g in existing):
+        aws('logs', 'create-log-group', {'logGroupName': group})
+    aws('logs', 'put-retention-policy', {'logGroupName': group, 'retentionInDays': 7})
+    result = aws('ecs', 'run-task', {'cluster': STATE['cluster'], 'taskDefinition': STATE['task_retire_demo'],
+        'launchType': 'FARGATE', 'platformVersion': 'LATEST', 'count': 1,
+        'networkConfiguration': {'awsvpcConfiguration': {'subnets': STATE['subnets'], 'securityGroups': [STATE['app_sg']], 'assignPublicIp': 'ENABLED'}}})
+    if result.get('failures') or not result.get('tasks'):
+        raise RuntimeError('Retire-demo task placement failed.')
+    STATE['retire_demo_task'] = result['tasks'][0]['taskArn']
+    save()
+    print('Retire-demo task started:', STATE['retire_demo_task'], flush=True)
+
+
+def retire_demo_status():
+    """Prints the retire-demo task state, exit code and its own log lines (counts only)."""
+    task = aws('ecs', 'describe-tasks', {'cluster': STATE['cluster'], 'tasks': [STATE['retire_demo_task']]})['tasks'][0]
+    print('Retire-demo task:', task['lastStatus'], 'exit', task['containers'][0].get('exitCode'), 'stopped:', task.get('stoppedReason'), flush=True)
+    task_id = STATE['retire_demo_task'].rsplit('/', 1)[-1]
+    try:
+        events = aws('logs', 'get-log-events', {'logGroupName': f'/agrimatch/{PREFIX}/retire-demo',
+            'logStreamName': f'retire-demo/Main/{task_id}', 'startFromHead': True})['events']
+    except RuntimeError:
+        events = []
+    for event in events:
+        print(event['message'], flush=True)
+
+
 def publish():
     # The line_event handler is live and LINE webhooks are on (owner approved, 20-21 Nov 2026), so the worker
     # follows each new revision. Set AGRIMATCH_WORKER_COUNT=0 to park it again.
@@ -630,9 +668,11 @@ if __name__ == '__main__':
         elif command == 'account': account()
         elif command == 'account-status': account_status()
         elif command == 'seed-status': seed_status()
+        elif command == 'retire-demo': retire_demo()
+        elif command == 'retire-demo-status': retire_demo_status()
         elif command == 'publish': publish()
         elif command == 'status': status()
-        else: raise RuntimeError('Use bootstrap, database, register IMAGE, migrate, publish, status, seed-setup, seed, or seed-status.')
+        else: raise RuntimeError('Use bootstrap, database, register IMAGE, migrate, publish, status, seed-setup, seed, seed-status, retire-demo, or retire-demo-status.')
     except Exception as error:
         print(str(error) if isinstance(error, RuntimeError) else f'Operation failed: {type(error).__name__}; details withheld.', file=sys.stderr)
         sys.exit(1)

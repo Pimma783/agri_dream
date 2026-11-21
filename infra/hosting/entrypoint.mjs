@@ -12,11 +12,13 @@ const specs = {
   verify: [['node', ['/app/infra/hosting/verify.mjs'], '/app', {}]],
   // One-off demo seed as the restricted app role. tsx is installed in the image (the build stage keeps devDependencies).
   seed: [['node', ['../../node_modules/tsx/dist/cli.mjs', 'scripts/seed-demo.ts', '--recompute'], '/app/apps/api', {}]],
+  // One-off: close (never delete) the demo seed's postings. See apps/api/scripts/retire-demo-postings.ts.
+  'retire-demo': [['node', ['../../node_modules/tsx/dist/cli.mjs', 'scripts/retire-demo-postings.ts'], '/app/apps/api', {}]],
   // One-off: create the single owner-chosen test account (see apps/api/scripts/create-account.ts).
   account: [['node', ['../../node_modules/tsx/dist/cli.mjs', 'scripts/create-account.ts'], '/app/apps/api', {}]],
 };
 if (!(mode in specs)) {
-  console.error('Expected app, worker, migrate, verify, seed, or account.');
+  console.error('Expected app, worker, migrate, verify, seed, retire-demo, or account.');
   process.exit(1);
 }
 let stopping = false;

@@ -490,3 +490,26 @@ export const acceptOfferResultSchema = z.object({
   replayed: z.boolean(),
 });
 export type AcceptOfferResult = z.infer<typeof acceptOfferResultSchema>;
+// ---- In-app notifications (`GET /notifications`, mirrors apps/api/src/services/notifications) ----
+export const NOTIFICATION_KINDS = ['NEW_MATCH'] as const;
+export const notificationKindSchema = z.enum(NOTIFICATION_KINDS);
+export const notificationSchema = z.object({
+  id: z.string(),
+  kind: notificationKindSchema,
+  route: z.number().int().min(1).max(4),
+  title_th: z.string(),
+  body_th: z.string(),
+  /** Relative web path, for example `/matches/<id>`. */
+  link_path: z.string().startsWith('/'),
+  created_at: isoUtcSchema,
+  read_at: isoUtcSchema.nullable(),
+});
+export type NotificationDto = z.infer<typeof notificationSchema>;
+export const notificationListSchema = z.object({
+  items: z.array(notificationSchema),
+  unread_count: z.number().int().min(0),
+});
+export type NotificationListDto = z.infer<typeof notificationListSchema>;
+/** `POST /notifications/:id/read` and `POST /notifications/read-all`. */
+export const notificationUnreadSchema = z.object({ unread_count: z.number().int().min(0) });
+export type NotificationUnreadDto = z.infer<typeof notificationUnreadSchema>;

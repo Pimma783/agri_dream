@@ -34,6 +34,8 @@ export type {
 } from './offers/index.js';
 export { createMatchReadService } from './matches/index.js';
 export type { MatchReadService, MatchView } from './matches/index.js';
+export { createNotificationService } from './notifications/index.js';
+export type { NotificationService, NotificationView, NotificationList } from './notifications/index.js';
 export { toOfferView } from './offers/view.js';
 export type { OfferView } from './offers/view.js';
 export { createResaleService } from './resale/index.js';

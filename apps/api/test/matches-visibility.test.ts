@@ -30,7 +30,7 @@ describe('toMatchView', () => {
     const v = toMatchView(matchRow(), 'demand', { type: 'LISTING', row: listing(), org: { kind: 'FARMER', name: 'Somchai Farmer' } });
     expect(v).toMatchObject({
       own_side: 'demand', own_entity_id: '44444444-4444-4444-8444-444444444444', tier: 1, score: '72.50',
-      score_label_th: 'ประมาณการ', weights_label_th: 'ค่าเริ่มต้นสำหรับเดโม', rule_version: 'rules-test.1', weight_coverage: '0.8000',
+      score_label_th: 'ประมาณการ', weights_label_th: 'น้ำหนักคะแนนเริ่มต้น', rule_version: 'rules-test.1', weight_coverage: '0.8000',
       missing_components: ['price'],
     });
     expect(v.distance).toMatchObject({ km: '12.30', kind: 'straight_line' });

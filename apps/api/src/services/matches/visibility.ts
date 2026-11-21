@@ -9,7 +9,7 @@ import type { Match } from '../../repos/matches.js';
 import type { BalingRequest, BalingService, Demand, Listing } from '../../repos/index.js';
 
 export const SCORE_LABEL_TH = 'ประมาณการ';
-export const WEIGHTS_LABEL_TH = 'ค่าเริ่มต้นสำหรับเดโม';
+export const WEIGHTS_LABEL_TH = 'น้ำหนักคะแนนเริ่มต้น';
 export const DISTANCE_LABEL_TH = 'ระยะเส้นตรง (ไม่ใช่ระยะขับรถ)';
 
 export type MatchEntityKind = 'LISTING' | 'DEMAND' | 'BALING_REQUEST' | 'BALING_SERVICE';

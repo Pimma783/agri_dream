@@ -64,7 +64,7 @@ export function OfferDetail({ o }: { o: OfferView }) {
         {o.ack_pending_material ? (
           <p data-testid="ack-note" className="text-xs text-amber-900">ผู้ส่งรับทราบแล้วว่าวัสดุยังอยู่ระหว่างรอรับหรือรออัด</p>
         ) : null}
-        {o.is_demo ? <p className="text-xs text-slate-600">ข้อมูลตัวอย่างสำหรับเดโม</p> : null}
+        {o.is_demo ? <p className="text-xs text-slate-600">ข้อมูลตัวอย่าง</p> : null}
       </section>
       <section aria-label="ประวัติ" className="rounded-xl border border-slate-200 bg-white p-4">
         <h2 className="mb-2 text-base font-semibold">ประวัติ</h2>

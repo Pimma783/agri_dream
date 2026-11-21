@@ -19,7 +19,7 @@ describe('labels', () => {
   it('uses the required Thai texts', () => {
     render(<><EstimateLabel /><DemoWeightsLabel /><ImageAssessmentDisclaimer /></>);
     expect(screen.getByText('ประมาณการ')).toBeTruthy();
-    expect(screen.getByText('ค่าเริ่มต้นสำหรับเดโม')).toBeTruthy();
+    expect(screen.getByText('น้ำหนักคะแนนเริ่มต้น')).toBeTruthy();
     expect(screen.getByText('การประเมินเบื้องต้นจากภาพ ไม่ใช่ผลตรวจคุณภาพจริง')).toBeTruthy();
   });
   it('keeps estimates visually separate from quoted prices', () => {

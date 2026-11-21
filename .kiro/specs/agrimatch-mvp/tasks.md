@@ -287,7 +287,7 @@ Rules for every task:
     - Run through the webhook with locally signed payloads, `FakeLineClient` and the mock Bedrock: direct sale with partial quantity, offer rejection, price mismatch, no coordinates, stale draft version, baling service agreement
     - _Requirements: 18.3, 18.4_
 
-- [~] 15. Checkpoint - core safety floor
+- [ ] 15. Checkpoint - core safety floor
   - Ensure all tests pass, ask the user if questions arise.
 
 - [x] 16. Resale story (story 3) [P0, CUT 5: last cut in the P0 group]
@@ -308,7 +308,7 @@ Rules for every task:
     - _Requirements: 14.12, 18.4_
 
 - [ ] 17. Baling request through the assistant chat [P0, CUT 4]
-  - [~] 17.1 Add the `baling_request` conversational flow [P0]
+  - [ ] 17.1 Add the `baling_request` conversational flow [P0]
     - Assistant tool patches a baling-request draft; confirmation buttons in LINE; on cut, keep the Dashboard provider side and the step-form questions only
     - _Requirements: 4.1, 4.7, 7.4_
   - [ ]* 17.2 Write unit tests for the baling-request flow [P0]
@@ -316,7 +316,7 @@ Rules for every task:
     - _Requirements: 4.7_
 
 - [ ] 18. Full LINE menus for BUYER_FACTORY [P0, CUT 3]
-  - [~] 18.1 Implement the factory menu flows [P0]
+  - [ ] 18.1 Implement the factory menu flows [P0]
     - Text and quick-reply menus for demand creation, matches and offers per spec 5.3; unfinished entries are not shown as usable
     - _Requirements: 16.8, 16.9_
   - [ ]* 18.2 Write unit tests for the factory menus [P0]
@@ -324,27 +324,27 @@ Rules for every task:
     - _Requirements: 2.8, 16.8_
 
 - [ ] 19. Image assessment for other roles [P1, CUT 2]
-  - [~] 19.1 Extend the image path to BALER and BUYER_FACTORY [P1]
+  - [ ] 19.1 Extend the image path to BALER and BUYER_FACTORY [P1]
     - Reuse the upload and assessment services; show source and time for any pre-baling image on a resale listing
     - _Requirements: 8.1, 14.8_
 
 - [ ] 20. Remaining P1 and P2 features [P1/P2, CUT 1: first to cut]
-  - [~] 20.1 Dashboard overview and organization and member settings [P1]
+  - [ ] 20.1 Dashboard overview and organization and member settings [P1]
     - `/`, `/settings/org`, `/settings/members`
     - _Requirements: 3.1, 16.1_
-  - [~] 20.2 Assistant page on the Dashboard [P1]
+  - [ ] 20.2 Assistant page on the Dashboard [P1]
     - `/assistant` with the same actor and data scope as LINE
     - _Requirements: 16.6_
-  - [~] 20.3 Rich menu and Flex Message builders [P1]
+  - [ ] 20.3 Rich menu and Flex Message builders [P1]
     - Builders and a setup script that does not run against LINE by default
     - _Requirements: 16.8_
-  - [~] 20.4 Conversation summary [P1]
+  - [ ] 20.4 Conversation summary [P1]
     - Summarize history beyond the window and send the summary instead of old messages
     - _Requirements: 4.12_
-  - [~] 20.5 Source-agreement cancellation handling [P1]
+  - [ ] 20.5 Source-agreement cancellation handling [P1]
     - Pause dependent resale listings, mark downstream agreements `NEEDS_REVIEW`, queue notifications, delete nothing
     - _Requirements: 14.13_
-  - [~] 20.6 Map and filters [P2]
+  - [ ] 20.6 Map and filters [P2]
     - Leaflet map and match filters on the Dashboard
     - _Requirements: 16.4_
 
@@ -352,7 +352,7 @@ Rules for every task:
   - [x] 21.1 Write the acceptance report script [P0]
     - Prints each checklist item of spec section 17 as `PASS (real)`, `PASS (mock)` or `NOT DONE`, reading each value from the adapter `kind`; lists every cut task; a mock-backed pass is never reported as real
     - _Requirements: 18.5, 18.6_
-  - [~] 21.2 Write the S3 and IAM infrastructure file for review [P0]
+  - [ ] 21.2 Write the S3 and IAM infrastructure file for review [P0]
     - `infra/` CloudFormation (or CDK) for a private S3 bucket in `ap-southeast-1` (block public access, SSE, lifecycle) and a least-privilege IAM policy for the media prefix and `bedrock:InvokeModel` on `anthropic.claude-sonnet-5`; follow `aws.md` and the AWS skill before writing; validate locally only (lint or synth); do NOT deploy and do not call AWS create or update APIs
     - _Requirements: 17.6, 17.8, 18.8_
   - [x] 21.3 Write `docs/HANDOVER.md` [P0]
@@ -368,8 +368,30 @@ Rules for every task:
     - Do not claim any real integration works
     - _Requirements: 18.5, 18.6, 18.7, 18.8_
 
-- [~] 22. Final checkpoint - Ensure all tests pass
+- [ ] 22. Final checkpoint - Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.
+
+- [x] 23. Match notifications, no-match farmer flow and retiring demo postings [P0]
+  - [x] 23.1 Add in-app notifications (bell) for Dashboard organizations [P0]
+    - Migration `notifications` with a unique constraint per org, kind, supply and demand
+    - Create rows in the matching recompute for NEW match pairs only (existing pairs never notify again)
+    - API `GET /notifications`, mark-read and read-all, each behind permission checks scoped to the caller's organization
+    - Web bell in the top bar with unread badge, 30 s polling, panel, mark-read, navigation to `/matches/:id`
+    - _Requirements: 9, 15, 16_
+  - [x] 23.2 Send the farmer LINE result after publish [P0]
+    - One outbox push per listing version: matches > 0 gives a summary; matches = 0 gives «ยังไม่มีผู้รับซื้อที่ตรงเงื่อนไข» with up to 3 deterministic tips built from the listing's own data
+    - Postback quick replies «เปิดประกาศไว้» and «ปิดประกาศ»; closing goes through the lifecycle service and is idempotent
+    - A later new match sends one farmer push per pair
+    - _Requirements: 2, 5, 9, 15_
+  - [x] 23.3 Retire demo postings without deleting [P0]
+    - Script that closes seed-created listings, demands, baling services and requests (`seed.demo` markers, `is_demo`), never touches user rows or accounts, and is repeatable
+    - Hosted one-off task mode `retire-demo` and its commands in `infra/hosting/aws-runtime.py`
+    - Replace the wording «ค่าเริ่มต้นสำหรับเดโม» with «น้ำหนักคะแนนเริ่มต้น» and keep «ประมาณการ»
+    - _Requirements: 18, 19_
+  - [x] 23.4 Write tests for 23.1 to 23.3 and run full local verification [P0]
+    - Use `FakeLineClient`, `MockBedrock`, the DB harness and a web component test for the bell
+    - Run the full local test suite, typecheck and lint
+    - _Requirements: 9, 18_
 
 ## Notes
 
@@ -398,7 +420,10 @@ Rules for every task:
     { "id": 12, "tasks": ["11.6", "12.2", "14.2", "16.4", "17.1", "18.1", "20.1", "20.2", "20.5", "20.6"] },
     { "id": 13, "tasks": ["16.5", "17.2", "18.2", "19.1", "20.3", "20.4"] },
     { "id": 14, "tasks": ["21.1", "21.2"] },
-    { "id": 15, "tasks": ["21.3"] }
+    { "id": 15, "tasks": ["21.3"] },
+    { "id": 16, "tasks": ["23.1", "23.3"] },
+    { "id": 17, "tasks": ["23.2"] },
+    { "id": 18, "tasks": ["23.4"] }
   ]
 }
 ```

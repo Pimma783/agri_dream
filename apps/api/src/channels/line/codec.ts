@@ -17,12 +17,14 @@ export const POSTBACK_ACTIONS = [
   'offer_reject',
   'offer_withdraw',
   'agreement_view',
+  'listing_keep', // เปิดประกาศไว้ (farmer, after the publish result)
+  'listing_close', // ปิดประกาศ (farmer)
 ] as const;
 export type PostbackAction = (typeof POSTBACK_ACTIONS)[number];
 
 /** Static per-role allow-list (design.md: "Allowed actions per role are a static table"). */
 export const ROLE_POSTBACK_ACTIONS: Readonly<Record<Role, readonly PostbackAction[]>> = {
-  FARMER: ['draft_confirm', 'draft_edit', 'draft_keep', 'offer_send', 'offer_accept', 'offer_reject', 'offer_withdraw', 'agreement_view'],
+  FARMER: ['draft_confirm', 'draft_edit', 'draft_keep', 'offer_send', 'offer_accept', 'offer_reject', 'offer_withdraw', 'agreement_view', 'listing_keep', 'listing_close'],
   BALER: ['draft_confirm', 'draft_edit', 'draft_keep', 'offer_send', 'offer_accept', 'offer_reject', 'offer_withdraw', 'agreement_view'],
   BUYER_FACTORY: ['draft_confirm', 'draft_edit', 'draft_keep', 'offer_send', 'offer_accept', 'offer_reject', 'offer_withdraw', 'agreement_view'],
 };

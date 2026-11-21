@@ -13,6 +13,7 @@
     "start": "node dist/server.js",
     "start:worker": "node dist/worker.js",
     "seed:demo": "tsx scripts/seed-demo.ts",
+    "retire-demo": "tsx scripts/retire-demo-postings.ts",
     "acceptance:report": "tsx scripts/acceptance-report.ts",
     "migrate": "node-pg-migrate -m ../../db/migrations --migrations-table pgmigrations --database-url-var DATABASE_URL"
   },

@@ -100,6 +100,9 @@ export const matches = {
           AND NOT (rule_version = $3 AND ${o.side === 'supply' ? 'demand_id' : 'supply_id'} = ANY($4::uuid[]))`,
       [o.entityId, [...o.routes], o.keepRuleVersion, [...o.keepIds]],
     ),
+  /** True when any stored result (any rule version) exists for the pair. */
+  pairExists: async (db: Db, route: number, supplyId: string, demandId: string): Promise<boolean> =>
+    ((await db.query('SELECT 1 FROM matches WHERE route = $1 AND supply_id = $2 AND demand_id = $3 LIMIT 1', [route, supplyId, demandId])).rowCount ?? 0) > 0,
   get: (db: Db, id: string) => maybe(db, MatchRow, 'SELECT * FROM matches WHERE id = $1', [id]),
   listBySupply: (db: Db, supplyId: string) =>
     many(db, MatchRow, 'SELECT * FROM matches WHERE supply_id = $1 ORDER BY score DESC, id', [supplyId]),

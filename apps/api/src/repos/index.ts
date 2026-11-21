@@ -13,6 +13,7 @@ export * from './baling-requests.js';
 export * from './media.js';
 export * from './image-assessments.js';
 export * from './matches.js';
+export * from './notifications.js';
 export * from './offers.js';
 export * from './agreements.js';
 export * from './ledger.js';

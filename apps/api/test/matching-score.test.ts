@@ -242,6 +242,6 @@ describe('Thai explanations', () => {
     expect(renderReasonTh({ code: 'MISSING_PRICE', params: { component: 'price' } })).toContain('ราคา');
     expect(renderFlagTh({ code: 'INCOMPLETE' })).toBe('ข้อมูลไม่ครบ');
     expect(renderFlagTh({ code: 'NEEDS_CONFIRMATION', field: 'window' })).toContain('ต้องสอบถาม');
-    expect(WEIGHTS_DISCLAIMER_TH).toContain('เดโม');
+    expect(WEIGHTS_DISCLAIMER_TH).toContain('ค่าเริ่มต้น');
   });
 });

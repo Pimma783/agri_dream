@@ -47,7 +47,7 @@ export function createDashboardHandler(channel: 'baler' | 'factory', deps: Dashb
   const linkPrompt = (): Msg =>
     say(`ยังไม่ได้ผูกบัญชี ขอรหัสผูกบัญชี 8 ตัวอักษรจากหน้า Dashboard ที่ ${origin}/settings/line แล้วพิมพ์รหัสในแชตนี้`);
   const dashboardReply = (): Msg =>
-    say(`ตอนนี้ผู้ช่วย AI ในแชตนี้ยังปิดอยู่ในเดโม กรุณาใช้ Dashboard: ${origin}/ หรือกดเมนูด้านล่าง`, menu());
+    say(`ตอนนี้ผู้ช่วย AI ในแชตนี้ยังปิดอยู่ กรุณาใช้ Dashboard: ${origin}/ หรือกดเมนูด้านล่าง`, menu());
   async function onLinkedText(ctx: LineEventContext, actor: Actor, text: string): Promise<void> {
     const t = text.trim();
     if (t === 'ข้อเสนอ') return listOffers(ctx, actor);

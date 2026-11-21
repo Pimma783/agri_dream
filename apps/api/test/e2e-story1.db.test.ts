@@ -101,7 +101,7 @@ describe.skipIf(!testDatabaseUrl)('story 1: direct sale, farmer in LINE, factory
     // the real button publishes; a replayed webhook and a second tap add nothing
     const sent = await line.send({ type: 'postback', postback: { data: confirm } });
     await e.runJobs(); await e.flushOutbox();
-    expect(line.inbox().at(-1)?.text).toContain('เผยแพร่เรียบร้อย');
+    expect(line.inbox().some((m) => m.text?.includes('เผยแพร่เรียบร้อย'))).toBe(true); // the result push follows it
     const events = await e.count(`SELECT count(*) AS n FROM webhook_events`);
     const jobs = await e.count(`SELECT count(*) AS n FROM jobs`);
     expect(await line.resend(sent.raw)).toBe(200);

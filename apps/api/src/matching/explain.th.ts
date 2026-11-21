@@ -4,7 +4,7 @@ import type { Flag, Reason } from './types.js';
 
 /** Requirement 10.7: shown wherever scores appear. */
 export const WEIGHTS_DISCLAIMER_TH =
-  'น้ำหนักคะแนนเป็นค่าเริ่มต้นสำหรับทดสอบเดโม ไม่ใช่สูตรที่พิสูจน์ว่าดีที่สุด';
+  'น้ำหนักคะแนนเป็นค่าเริ่มต้นสำหรับทดสอบ ไม่ใช่สูตรที่พิสูจน์ว่าดีที่สุด';
 
 const MISSING_LABEL_TH: Readonly<Record<string, string>> = {
   distance: 'ระยะทาง',

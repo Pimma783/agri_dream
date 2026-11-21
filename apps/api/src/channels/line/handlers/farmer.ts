@@ -48,6 +48,9 @@ export const FARMER_TEXT = {
   locationSaved: 'บันทึกตำแหน่งที่คุณส่งแล้ว ใช้คำนวณระยะทางเส้นตรง',
   image: 'ได้รับรูปแล้ว ระบบประเมินจากรูปกำลังจะเปิดใช้งาน ตอนนี้พิมพ์ข้อมูลวัสดุให้ผู้ช่วยได้เลย',
   web: 'ดูรายละเอียดข้อตกลงได้ที่หน้าเว็บ',
+  listingKept: 'ประกาศของคุณยังเปิดอยู่ เมื่อมีผู้รับซื้อใหม่ตรงเงื่อนไข ระบบจะแจ้งให้ทราบ',
+  listingClosed: 'ปิดประกาศแล้ว',
+  listingAlreadyClosed: 'ประกาศนี้ปิดไปแล้ว',
   unsupported: 'ยังทำรายการนี้ในแชตไม่ได้ กรุณาใช้หน้าเว็บ',
 } as const;
 
@@ -60,7 +63,7 @@ export interface FarmerHandlerDeps {
   conversations: Pick<ConversationService, 'open' | 'append' | 'setActiveDraft'>;
   offers: Pick<OfferService, 'get' | 'list' | 'accept' | 'reject'>;
   /** Read-only lists for «รายการของฉัน». Without them only open drafts are listed. */
-  listings?: Pick<ListingService, 'list'>;
+  listings?: Pick<ListingService, 'list' | 'get' | 'close'>;
   balingRequests?: Pick<BalingRequestService, 'list'>;
   /** True when the AI assistant answers free text. Default true. Evaluated per event. */
   aiEnabled?: () => boolean;
@@ -240,6 +243,18 @@ export function createFarmerHandler(deps: FarmerHandlerDeps): LineChannelHandler
     return say(lines.join('\n'), MENU);
   }
 
+  /** Keep or close a listing from the publish-result buttons. The service checks ownership; a closed listing replies calmly. */
+  async function listingChoice(actor: Actor, action: 'listing_keep' | 'listing_close', id: string): Promise<Msg> {
+    if (!deps.listings) return say(FARMER_TEXT.unsupported, MENU);
+    const g = await deps.listings.get(actor, id); // NOT_FOUND for a listing of another organization
+    if (!g.ok) return fail(g);
+    const closed = g.value.status === 'CLOSED' || g.value.status === 'CANCELLED';
+    if (closed) return say(FARMER_TEXT.listingAlreadyClosed, MENU);
+    if (action === 'listing_keep') return say(FARMER_TEXT.listingKept, MENU);
+    const r = await deps.listings.close(actor, { id, expectedVersion: g.value.version });
+    return r.ok ? say(FARMER_TEXT.listingClosed, MENU) : fail(r);
+  }
+
   async function onPostback(ctx: LineEventContext, actor: Actor, data: string): Promise<void> {
     const decoded = decodePostback(data);
     if (!decoded.ok) return ctx.reply([say(FARMER_TEXT.badButton)]);
@@ -283,6 +298,9 @@ export function createFarmerHandler(deps: FarmerHandlerDeps): LineChannelHandler
       }
       case 'agreement_view':
         return ctx.reply([say(FARMER_TEXT.web)]);
+      case 'listing_keep':
+      case 'listing_close':
+        return ctx.reply([await listingChoice(actor, action, id)]);
       default:
         return ctx.reply([say(FARMER_TEXT.unsupported)]);
     }
