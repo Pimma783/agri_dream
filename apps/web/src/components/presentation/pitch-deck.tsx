@@ -132,7 +132,7 @@ export function PitchDeck({ slide: initial }: { slide: number }) {
           </section>
         ))}
       </main>
-      <div className="hidden xl:block"><div className="sticky top-24"><PhoneFrame /></div></div>
+      <div className="hidden xl:block"><div className="sticky top-24"><PhoneFrame slide={slide} /></div></div>
       </div>
 
       <footer className="sticky bottom-0 flex items-center justify-between gap-2 border-t border-slate-200 bg-slate-50/95 py-2">

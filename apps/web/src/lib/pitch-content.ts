@@ -160,3 +160,16 @@ export const TRANSPORT_TABLE: Table = {
 
 /** Sources for the notes line under the last slide (same list as the script). */
 export const SOURCES = ['so05.tci-thaijo.org', 'tei.or.th', 'PMC21243095', 'IPCC NGGIP (ch4wb2.pdf)', 'nationthailand (บทความ TGO)', 'tver.tgo.or.th'];
+
+/** Which real screen the phone frame shows for each slide (same order as SLIDES). Pages behind login ask to sign in first. */
+export const PHONE_SCREENS: { href: string; label: string }[] = [
+  { href: FARMER_HREF, label: 'เกษตรกรเข้าระบบผ่าน LINE' },
+  { href: FARMER_HREF, label: 'เกษตรกรเข้าระบบผ่าน LINE' },
+  { href: '/factory/market', label: 'ตลาดวัสดุ: ผลจับคู่' },
+  { href: '/factory/orders', label: 'คำสั่งซื้อขายที่ยืนยันแล้ว' },
+  { href: '/factory', label: 'ภาพรวมธุรกิจ' },
+  { href: '/factory/shipping', label: 'การจัดส่ง' },
+  { href: '/factory/reports', label: 'รายงาน' },
+  { href: '/factory/reports', label: 'รายงาน: มูลค่าและปริมาณ' },
+  { href: FACTORY_HREF, label: 'ลองเข้าใช้งานเอง' },
+];

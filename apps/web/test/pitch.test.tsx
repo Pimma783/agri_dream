@@ -2,7 +2,7 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { PitchDeck } from '@/components/presentation/pitch-deck';
-import { PITCH_COUNT, SLIDES, TRANSPORT_TABLE, parsePitchSlide, transportPerTon } from '@/lib/pitch-content';
+import { PHONE_SCREENS, PITCH_COUNT, SLIDES, TRANSPORT_TABLE, parsePitchSlide, transportPerTon } from '@/lib/pitch-content';
 
 beforeEach(() => window.history.replaceState(null, '', '/pitch'));
 afterEach(cleanup);
@@ -44,6 +44,20 @@ describe('try the real site', () => {
     const bar = screen.getByTestId('try-bar');
     expect(bar.querySelector('a[href="/login?role=factory"]')).not.toBeNull();
     expect(bar.querySelector('a[href="/login?role=farmer"]')).not.toBeNull();
+  });
+});
+
+describe('phone frame', () => {
+  it('has one screen per slide', () => expect(PHONE_SCREENS).toHaveLength(PITCH_COUNT));
+  it('follows the slide and lets a button override until the next slide', () => {
+    render(<PitchDeck slide={2} />);
+    const src = () => screen.getByTestId('phone-iframe').getAttribute('src');
+    expect(src()).toBe('/factory/market');
+    fireEvent.click(screen.getByRole('button', { name: /เกษตรกร/ , pressed: false }));
+    expect(src()).toBe('/login?role=farmer');
+    expect(screen.getByTestId('phone-caption').textContent).toBe('เลือกเอง');
+    fireEvent.click(screen.getByRole('button', { name: /ถัดไป/ }));
+    expect(src()).toBe('/factory/orders');
   });
 });
 
