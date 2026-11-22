@@ -2,6 +2,8 @@
 // Source: agrimatch-presentation.md. Every figure without a source is an assumption and is labelled as one on the slide.
 export const PITCH_COUNT = 9;
 export const DEMO_HREF = '/presentation';
+export const FACTORY_HREF = '/login?role=factory';
+export const FARMER_HREF = '/login?role=farmer';
 
 export interface Item { icon: string; text: string; title?: string }
 export interface Table { head: string[]; rows: string[][]; foot?: string[] }

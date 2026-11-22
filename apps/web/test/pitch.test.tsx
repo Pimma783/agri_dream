@@ -38,6 +38,15 @@ describe('pitch content', () => {
   });
 });
 
+describe('try the real site', () => {
+  it('shows factory and farmer login links on every slide', () => {
+    render(<PitchDeck slide={0} />);
+    const bar = screen.getByTestId('try-bar');
+    expect(bar.querySelector('a[href="/login?role=factory"]')).not.toBeNull();
+    expect(bar.querySelector('a[href="/login?role=farmer"]')).not.toBeNull();
+  });
+});
+
 describe('navigation', () => {
   it('moves with buttons and arrow keys within range and keeps ?s=', () => {
     render(<PitchDeck slide={0} />);

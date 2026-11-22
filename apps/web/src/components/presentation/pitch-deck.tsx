@@ -1,7 +1,7 @@
 'use client';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  DEMO_HREF, PITCH_COUNT, PITCH_SITE as T, SLIDES, SOURCES, TRANSPORT_TABLE, type Table,
+  DEMO_HREF, FACTORY_HREF, FARMER_HREF, PITCH_COUNT, PITCH_SITE as T, SLIDES, SOURCES, TRANSPORT_TABLE, type Table,
 } from '@/lib/pitch-content';
 
 const BTN =
@@ -64,6 +64,11 @@ export function PitchDeck({ slide: initial }: { slide: number }) {
         <a href={DEMO_HREF} className="hidden text-sm font-medium text-emerald-800 underline md:inline">{T.demoCta}</a>
       </header>
       <p className="rounded-lg bg-amber-50 px-3 py-1 text-sm text-amber-900" data-testid="status">{T.status}</p>
+
+      <div className="flex gap-2" data-testid="try-bar">
+        <a href={FACTORY_HREF} className={`${BTN} flex-1 bg-emerald-700 text-sm text-white`}>🏭 ลองใช้เว็บ (โรงงาน)</a>
+        <a href={FARMER_HREF} className={`${BTN} flex-1 border-2 border-emerald-700 bg-white text-sm text-emerald-800`}>🌾 เกษตรกร (LINE)</a>
+      </div>
 
       <main className="flex-1 space-y-6">
         {SLIDES.map((s, i) => (
