@@ -2,6 +2,7 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { PitchDeck } from '@/components/presentation/pitch-deck';
+import { SCENE_COUNT } from '@/components/presentation/pitch-scenes';
 import { PHONE_SCREENS, PITCH_COUNT, SLIDES, TRANSPORT_TABLE, parsePitchSlide, transportPerTon } from '@/lib/pitch-content';
 
 beforeEach(() => window.history.replaceState(null, '', '/pitch'));
@@ -44,6 +45,16 @@ describe('try the real site', () => {
     const bar = screen.getByTestId('try-bar');
     expect(bar.querySelector('a[href="/login?role=factory"]')).not.toBeNull();
     expect(bar.querySelector('a[href="/login?role=farmer"]')).not.toBeNull();
+  });
+});
+
+describe('cartoon scenes', () => {
+  it('has a described scene for every slide', () => {
+    expect(SCENE_COUNT).toBe(PITCH_COUNT);
+    render(<PitchDeck slide={0} />);
+    const scenes = screen.getAllByTestId('scene');
+    expect(scenes).toHaveLength(PITCH_COUNT);
+    scenes.forEach((sv) => expect(sv.getAttribute('aria-label')).toMatch(/^ภาพการ์ตูน/));
   });
 });
 

@@ -1,1 +1,31 @@
 @import "tailwindcss";
+
+/* Pitch scene animations (components/presentation/pitch-scenes.tsx). Each class does one small thing. */
+.pa-box { transform-box: fill-box; transform-origin: center; }
+.pa-rise { animation: pa-rise 3.2s ease-out infinite; }
+.pa-flicker { animation: pa-flicker 0.7s ease-in-out infinite alternate; transform-origin: 50% 100%; transform-box: fill-box; }
+.pa-bob { animation: pa-bob 1.6s ease-in-out infinite; }
+.pa-pulse { animation: pa-pulse 1.8s ease-in-out infinite; }
+.pa-spin { animation: pa-spin 14s linear infinite; }
+.pa-flow { stroke-dasharray: 6 6; animation: pa-flow 1.2s linear infinite; }
+.pa-roam { animation: pa-roam 7s ease-in-out infinite; }
+.pa-drive { animation: pa-drive 4.5s linear infinite; }
+.pa-grow { animation: pa-grow 2.4s cubic-bezier(.2,.8,.2,1) both; transform-origin: 50% 100%; transform-box: fill-box; }
+.pa-fall { animation: pa-fall 2.4s ease-in infinite; }
+.pa-light { animation: pa-light 6s steps(1) infinite; }
+.pa-walk { animation: pa-walk 6s ease-in-out infinite; }
+.pa-sway { animation: pa-sway 3s ease-in-out infinite; transform-origin: 50% 100%; transform-box: fill-box; }
+@keyframes pa-rise { 0% { transform: translateY(0) scale(.6); opacity: 0; } 15% { opacity: .85; } 100% { transform: translateY(-90px) scale(1.7); opacity: 0; } }
+@keyframes pa-flicker { from { transform: scaleY(.8) rotate(-3deg); } to { transform: scaleY(1.15) rotate(3deg); } }
+@keyframes pa-bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+@keyframes pa-pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.12); } }
+@keyframes pa-spin { to { transform: rotate(360deg); } }
+@keyframes pa-flow { to { stroke-dashoffset: -24; } }
+@keyframes pa-roam { 0% { transform: translate(0,0); } 25% { transform: translate(120px,-30px); } 50% { transform: translate(210px,25px); } 75% { transform: translate(90px,40px); } 100% { transform: translate(0,0); } }
+@keyframes pa-drive { 0% { transform: translateX(-60px); } 100% { transform: translateX(420px); } }
+@keyframes pa-grow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+@keyframes pa-fall { 0% { transform: translateY(-60px); opacity: 0; } 20% { opacity: 1; } 100% { transform: translateY(70px); opacity: 1; } }
+@keyframes pa-light { 0%,100% { opacity: .25; } 10% { opacity: 1; } 40% { opacity: 1; } }
+@keyframes pa-walk { 0% { transform: translateX(0); } 100% { transform: translateX(300px); } }
+@keyframes pa-sway { 0%,100% { transform: rotate(-4deg); } 50% { transform: rotate(4deg); } }
+@media (prefers-reduced-motion: reduce) { .pa-box *, .pa-box, [class*="pa-"] { animation: none !important; } }

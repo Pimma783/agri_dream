@@ -1,6 +1,7 @@
 'use client';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { PhoneFrame } from './phone-frame';
+import { PitchScene } from './pitch-scenes';
 import {
   DEMO_HREF, FACTORY_HREF, FARMER_HREF, PITCH_COUNT, PITCH_SITE as T, SLIDES, SOURCES, TRANSPORT_TABLE, type Table,
 } from '@/lib/pitch-content';
@@ -79,6 +80,8 @@ export function PitchDeck({ slide: initial }: { slide: number }) {
             <p className="text-sm font-medium text-slate-500">{T.slideWord} {i + 1}/{PITCH_COUNT} · {s.time}</p>
             <h2 id={`slide-title-${i + 1}`} className="text-3xl font-bold text-slate-900 md:text-4xl">{s.title}</h2>
             {s.lead ? <p className="text-lg text-slate-700 md:text-xl">{s.lead}</p> : null}
+
+            <PitchScene key={`${i}-${i === slide}`} index={i} />
 
             {s.items ? (
               <ul className="grid gap-3 md:grid-cols-2">
