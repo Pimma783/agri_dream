@@ -76,9 +76,9 @@ export function PitchDeck({ slide: initial }: { slide: number }) {
       <main className="space-y-6">
         {SLIDES.map((s, i) => (
           <section key={s.title} id={`slide-${i + 1}`} ref={(el) => { refs.current[i] = el; }} data-slide={i + 1} data-active={i === slide}
-            aria-labelledby={`slide-title-${i + 1}`} className={`scroll-mt-28 space-y-3 ${i === slide ? 'block' : 'max-md:block md:hidden'}`}>
+            aria-labelledby={`slide-title-${i + 1}`} className={`scroll-mt-28 space-y-3 ${i === slide ? 'pa-enter block' : 'max-md:block md:hidden'}`}>
             <p className="text-sm font-medium text-slate-500">{T.slideWord} {i + 1}/{PITCH_COUNT} · {s.time}</p>
-            <h2 id={`slide-title-${i + 1}`} className="text-3xl font-bold text-slate-900 md:text-4xl">{s.title}</h2>
+            <h2 id={`slide-title-${i + 1}`} className={`text-3xl font-bold text-slate-900 md:text-4xl ${i === slide ? 'pa-title' : ''}`}>{s.title}</h2>
             {s.lead ? <p className="text-lg text-slate-700 md:text-xl">{s.lead}</p> : null}
 
             <PitchScene key={`${i}-${i === slide}`} index={i} />

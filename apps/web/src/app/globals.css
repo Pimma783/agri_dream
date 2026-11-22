@@ -29,3 +29,16 @@
 @keyframes pa-walk { 0% { transform: translateX(0); } 100% { transform: translateX(300px); } }
 @keyframes pa-sway { 0%,100% { transform: rotate(-4deg); } 50% { transform: rotate(4deg); } }
 @media (prefers-reduced-motion: reduce) { .pa-box *, .pa-box, [class*="pa-"] { animation: none !important; } }
+
+/* Story layer: clouds, slide entrance, pop-in. */
+.pa-cloud { animation: pa-cloud 28s linear infinite; }
+.pa-cloud-slow { animation: pa-cloud 46s linear infinite; }
+.pa-enter { animation: pa-enter .6s cubic-bezier(.2,.8,.2,1) both; }
+.pa-title { animation: pa-title .7s cubic-bezier(.2,.9,.3,1.2) both; }
+.pa-walkin { animation: pa-walkin 1.4s ease-out both; }
+.pa-hop { animation: pa-hop .5s ease-in-out infinite alternate; }
+@keyframes pa-cloud { from { transform: translateX(-120px); } to { transform: translateX(520px); } }
+@keyframes pa-enter { from { opacity: 0; transform: translateX(28px); } to { opacity: 1; transform: none; } }
+@keyframes pa-title { from { opacity: 0; transform: translateY(14px) scale(.96); } to { opacity: 1; transform: none; } }
+@keyframes pa-walkin { from { transform: translateX(-90px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes pa-hop { from { transform: translateY(0); } to { transform: translateY(-6px); } }
