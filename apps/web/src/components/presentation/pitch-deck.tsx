@@ -62,7 +62,7 @@ export function PitchDeck({ slide: initial }: { slide: number }) {
             </button>
           ))}
         </nav>
-        <a href={DEMO_HREF} className="hidden text-sm font-medium text-emerald-800 underline md:inline">{T.demoCta}</a>
+        <a href="/start" className="text-sm font-medium text-emerald-800 underline">เลือกโหมด</a>
       </header>
       <p className="rounded-lg bg-amber-50 px-3 py-1 text-sm text-amber-900" data-testid="status">{T.status}</p>
 

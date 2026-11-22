@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
+import { LogoutLink } from './logout-link';
 
 const NAV = [
   { href: '/factory', label: 'ภาพรวม', icon: '▦' },
@@ -51,7 +52,7 @@ export function FactoryShell({ orgName, children }: { orgName: string; children:
             <p className="mt-1 text-slate-600">เปลี่ยนวัสดุเหลือใช้ให้เป็นโอกาสของธุรกิจ</p>
           </div>
           <Link href="/factory/help" className="block px-3 py-1 text-sm text-slate-600">ⓘ ศูนย์ช่วยเหลือ</Link>
-          <Link href="/login" className="block px-3 py-1 text-sm text-slate-600">⇥ ออกจากระบบ</Link>
+          <LogoutLink className="block px-3 py-1 text-left text-sm text-slate-600">⇥ ออกจากระบบ</LogoutLink>
         </div>
       </aside>
       <div className="min-w-0 flex-1">

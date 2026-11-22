@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { LogoutLink } from '@/components/factory/logout-link';
 import { Card, PageHead } from '@/components/factory/ui';
 
 const LINKS = [
@@ -22,7 +23,7 @@ export default function MorePage() {
             <span aria-hidden="true" className="text-slate-400">›</span>
           </Link>
         ))}
-        <Link href="/login" className="flex items-center gap-3 px-4 py-4 text-sm text-slate-600"><span aria-hidden="true" className="w-9 text-center">⇥</span>ออกจากระบบ</Link>
+        <LogoutLink className="flex w-full items-center gap-3 px-4 py-4 text-left text-sm text-slate-600"><span aria-hidden="true" className="w-9 text-center">⇥</span>ออกจากระบบ</LogoutLink>
       </Card>
     </>
   );
