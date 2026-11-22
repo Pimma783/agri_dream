@@ -1,5 +1,6 @@
 'use client';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { PhoneFrame } from './phone-frame';
 import {
   DEMO_HREF, FACTORY_HREF, FARMER_HREF, PITCH_COUNT, PITCH_SITE as T, SLIDES, SOURCES, TRANSPORT_TABLE, type Table,
 } from '@/lib/pitch-content';
@@ -50,7 +51,7 @@ export function PitchDeck({ slide: initial }: { slide: number }) {
   }, [slide]);
 
   return (
-    <div className="mx-auto flex w-full min-w-0 max-w-5xl flex-col gap-4 px-4 py-4 md:min-h-screen">
+    <div className="mx-auto flex w-full min-w-0 max-w-7xl flex-col gap-4 px-4 py-4 md:min-h-screen">
       <header className="sticky top-0 z-10 -mx-4 flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 bg-slate-50/95 px-4 py-2">
         <p className="text-xl font-semibold text-emerald-800">AgriMatch</p>
         <nav aria-label={T.navLabel} className="order-last flex w-full items-center gap-1 md:order-none md:w-auto">
@@ -65,12 +66,13 @@ export function PitchDeck({ slide: initial }: { slide: number }) {
       </header>
       <p className="rounded-lg bg-amber-50 px-3 py-1 text-sm text-amber-900" data-testid="status">{T.status}</p>
 
-      <div className="flex gap-2" data-testid="try-bar">
+      <div className="flex gap-2 xl:hidden" data-testid="try-bar">
         <a href={FACTORY_HREF} className={`${BTN} flex-1 bg-emerald-700 text-sm text-white`}>🏭 ลองใช้เว็บ (โรงงาน)</a>
         <a href={FARMER_HREF} className={`${BTN} flex-1 border-2 border-emerald-700 bg-white text-sm text-emerald-800`}>🌾 เกษตรกร (LINE)</a>
       </div>
 
-      <main className="flex-1 space-y-6">
+      <div className="grid flex-1 gap-8 xl:grid-cols-[minmax(0,1fr)_380px]">
+      <main className="space-y-6">
         {SLIDES.map((s, i) => (
           <section key={s.title} id={`slide-${i + 1}`} ref={(el) => { refs.current[i] = el; }} data-slide={i + 1} data-active={i === slide}
             aria-labelledby={`slide-title-${i + 1}`} className={`scroll-mt-28 space-y-3 ${i === slide ? 'block' : 'max-md:block md:hidden'}`}>
@@ -130,6 +132,8 @@ export function PitchDeck({ slide: initial }: { slide: number }) {
           </section>
         ))}
       </main>
+      <div className="hidden xl:block"><div className="sticky top-24"><PhoneFrame /></div></div>
+      </div>
 
       <footer className="sticky bottom-0 flex items-center justify-between gap-2 border-t border-slate-200 bg-slate-50/95 py-2">
         <button type="button" onClick={() => go(slide - 1)} disabled={slide === 0} className={`${BTN} bg-white text-slate-800 ring-1 ring-slate-300`}>← {T.prev}</button>
