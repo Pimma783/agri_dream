@@ -26,3 +26,5 @@ apps/web/next-env.d.ts
 .ruff_cache/
 node_modules/
 infra/hosting/__pycache__/
+.vercel
+.env*

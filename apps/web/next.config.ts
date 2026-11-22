@@ -8,6 +8,10 @@ const apiInternalUrl = (process.env.API_INTERNAL_URL ?? 'http://localhost:4000')
 
 const nextConfig: NextConfig = {
   transpilePackages: ['@agrimatch/contracts'],
+  // Showcase deploys (e.g. Vercel without the API) send the home page to the public mode chooser.
+  async redirects() {
+    return process.env.SHOWCASE_ONLY === '1' ? [{ source: '/', destination: '/start', permanent: false }] : [];
+  },
   async rewrites() {
     return [{ source: '/api/:path*', destination: `${apiInternalUrl}/:path*` }];
   },
