@@ -71,7 +71,7 @@ export function PitchDeck({ slide: initial }: { slide: number }) {
         <a href={FARMER_HREF} className={`${BTN} flex-1 border-2 border-emerald-700 bg-white text-sm text-emerald-800`}>🌾 เกษตรกร (LINE)</a>
       </div>
 
-      <div className="grid flex-1 gap-8 xl:grid-cols-[minmax(0,1fr)_380px]">
+      <div className="grid flex-1 gap-8 xl:grid-cols-[minmax(0,1fr)_480px]">
       <main className="space-y-6">
         {SLIDES.map((s, i) => (
           <section key={s.title} id={`slide-${i + 1}`} ref={(el) => { refs.current[i] = el; }} data-slide={i + 1} data-active={i === slide}
