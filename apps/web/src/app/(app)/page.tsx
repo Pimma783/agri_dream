@@ -1,3 +1,4 @@
+import { redirect } from 'next/navigation';
 import { Notice } from '@/components/feedback';
 import { PageTitle } from '@/components/cards';
 import { requireSession } from '@/lib/api-server';
@@ -6,6 +7,8 @@ import { ROLE_LABEL_TH } from '@/lib/nav';
 // Minimal shell. Real dashboard content arrives with tasks 11.2-11.5.
 export default async function HomePage() {
   const me = await requireSession();
+  // Factory accounts use the desktop portal as their home.
+  if (me.role === 'FACTORY') redirect('/factory');
   return (
     <>
       <PageTitle>หน้าหลัก</PageTitle>

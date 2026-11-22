@@ -9,13 +9,13 @@ const NAV = [
   { href: '/factory/orders', label: 'คำสั่งซื้อขาย', icon: '☰' },
   { href: '/factory/shipping', label: 'การจัดส่ง', icon: '⛟' },
   { href: '/factory/reports', label: 'รายงาน', icon: '▥' },
-  { href: '/factory/messages', label: 'ข้อความ', icon: '✉', badge: 3 },
+  { href: '/factory/messages', label: 'ข้อความ', icon: '✉' },
   { href: '/factory/settings', label: 'ตั้งค่าโรงงาน', icon: '⚙' },
 ];
 const TITLES: Record<string, string> = Object.fromEntries(NAV.map((n) => [n.href, n.label]));
 TITLES['/factory/help'] = 'ศูนย์ช่วยเหลือ';
 
-export function FactoryShell({ children }: { children: ReactNode }) {
+export function FactoryShell({ orgName, children }: { orgName: string; children: ReactNode }) {
   const path = usePathname() ?? '/factory';
   const on = (h: string) => (h === '/factory' ? path === h : path.startsWith(h));
   const current = Object.keys(TITLES).filter(on).sort((a, b) => b.length - a.length)[0];
@@ -32,7 +32,6 @@ export function FactoryShell({ children }: { children: ReactNode }) {
               className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm ${on(n.href) ? 'bg-[#dcebdc] font-semibold text-[#17402a]' : 'text-slate-600 hover:bg-slate-50'}`}>
               <span aria-hidden="true" className="w-4 text-center">{n.icon}</span>
               <span className="flex-1">{n.label}</span>
-              {n.badge ? <span className="rounded-full bg-[#dcebdc] px-1.5 text-[10px]">{n.badge}</span> : null}
             </Link>
           ))}
         </nav>
@@ -52,7 +51,7 @@ export function FactoryShell({ children }: { children: ReactNode }) {
             <span aria-label="การแจ้งเตือน">🔔</span>
             <span className="flex items-center gap-2 rounded-lg bg-[#f3f6f1] px-3 py-1.5">
               <span className="grid h-7 w-7 place-items-center rounded bg-[#dcebdc] text-[#1f6b43]">▥</span>
-              <span><b className="block text-slate-800">บริษัท กรีนเอ็นเนอร์จี จำกัด</b>บัญชีโรงงานรับซื้อ</span>
+              <span><b className="block text-slate-800">{orgName}</b>บัญชีโรงงานรับซื้อ</span>
             </span>
           </div>
         </header>

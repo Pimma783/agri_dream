@@ -1,10 +1,11 @@
-import { PageHead } from '@/components/factory/ui';
+import { DemoNotice, PageHead } from '@/components/factory/ui';
 import { THREADS } from '@/lib/factory-mock';
 
 export default function MessagesPage() {
   return (
     <>
       <PageHead title="ข้อความ" sub="สนทนากับผู้ขายและผู้อัดฟาง" />
+      <DemoNotice>ระบบยังไม่มีแชทระหว่างคู่ค้าในเวอร์ชันนี้ (ไม่เปิดเผยข้อมูลติดต่อจนกว่าจะมีข้อตกลง)</DemoNotice>
       <div className="grid min-h-[480px] overflow-hidden rounded-xl border border-[#e5eae3] bg-white md:grid-cols-[280px_1fr]">
         <ul className="border-r border-[#e5eae3]">
           {THREADS.map((t, i) => (

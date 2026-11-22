@@ -1,4 +1,4 @@
-import { Card, GREEN, PageHead, Pill, Stat, td, th } from '@/components/factory/ui';
+import { DemoNotice, Card, GREEN, PageHead, Pill, Stat, td, th } from '@/components/factory/ui';
 import { ORDERS } from '@/lib/factory-mock';
 
 const STEPS = ['รับคำสั่งซื้อ', 'เตรียมสินค้า', 'ระหว่างขนส่ง', 'ถึงปลายทาง'];
@@ -7,6 +7,7 @@ export default function ShippingPage() {
   return (
     <>
       <PageHead title="การจัดส่ง" sub="ติดตามการขนส่งวัสดุระหว่างแหล่งผลิตถึงโรงงาน" action={<button className={`rounded-lg px-4 py-2 text-sm ${GREEN}`}>ส่งออกข้อมูล</button>} />
+      <DemoNotice>ระบบยังไม่มีข้อมูลการจัดส่งจริงในเวอร์ชันนี้ (ข้อตกลงบันทึกเฉพาะการยืนยัน ไม่มีสถานะส่งมอบ)</DemoNotice>
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <Stat label="การจัดส่งทั้งหมด" value="24" unit="รายการ" /><Stat label="รอยืนยัน" value="4" /><Stat label="ระหว่างทาง" value="6" /><Stat label="จัดส่งสำเร็จ" value="14" />
       </div>

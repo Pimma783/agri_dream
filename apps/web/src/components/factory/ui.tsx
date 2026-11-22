@@ -58,3 +58,7 @@ export function BarChart({ labels, values, height = 160 }: { labels: string[]; v
 
 export const th = 'px-3 py-2 text-left text-xs font-medium text-slate-500';
 export const td = 'px-3 py-3 text-sm';
+
+export function DemoNotice({ children }: { children: ReactNode }) {
+  return <p className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">ข้อมูลตัวอย่าง: {children}</p>;
+}
