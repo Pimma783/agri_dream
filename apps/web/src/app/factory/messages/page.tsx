@@ -15,7 +15,7 @@ export default function MessagesPage() {
               {t.unread ? <span className="h-fit rounded-full bg-[#1f6b43] px-1.5 text-[10px] text-white">{t.unread}</span> : null}
             </li>))}
         </ul>
-        <div className="flex flex-col p-4">
+        <div className="hidden flex-col p-4 md:flex">
           <p className="border-b pb-3 font-semibold text-[#17402a]">โรงสีรุ่งเรือง</p>
           <div className="flex flex-1 flex-col justify-end gap-2 py-4 text-sm">
             <p className="max-w-xs rounded-xl bg-slate-100 p-3">ส่งรูปแกลบล็อตล่าสุดให้แล้วครับ</p>

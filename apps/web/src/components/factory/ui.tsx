@@ -15,7 +15,7 @@ export function PageHead({ title, sub, action }: { title: string; sub?: string; 
 }
 
 export function Card({ children, className = '' }: { children: ReactNode; className?: string }) {
-  return <section className={`rounded-xl border border-[#e5eae3] bg-white p-5 ${className}`}>{children}</section>;
+  return <section className={`overflow-x-auto rounded-xl border border-[#e5eae3] bg-white p-4 md:p-5 ${className}`}>{children}</section>;
 }
 
 export function Stat({ label, value, unit, note }: { label: string; value: string; unit?: string; note?: string }) {
