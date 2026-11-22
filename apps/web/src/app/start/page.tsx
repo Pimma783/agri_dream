@@ -15,8 +15,8 @@ const CARDS = [
     cta: 'เข้าสู่ต้นแบบ', tone: 'bg-emerald-700 text-white hover:bg-emerald-800',
   },
   {
-    href: '/pitch', icon: '🎤', title: 'นำเสนอ', en: 'Presentation',
-    text: 'ดูสไลด์ 9 หน้า ปัญหา วิธีแก้ ตัวเลข และโครงการนำร่อง พร้อมกรอบมือถือที่กดใช้ได้',
+    href: '/story', icon: '🎤', title: 'นำเสนอ', en: 'Presentation',
+    text: 'เลื่อนลงเพื่อเล่าเรื่องในโลก 3D 9 ตอน กล้องเปลี่ยนมุมตามเนื้อหา (มีแบบสไลด์พร้อมกรอบมือถือด้วย)',
     cta: 'เปิดการนำเสนอ', tone: 'border-2 border-emerald-700 bg-white text-emerald-800 hover:bg-emerald-50',
   },
 ] as const;
@@ -38,7 +38,7 @@ export default function StartPage() {
           </li>
         ))}
       </ul>
-      <p className="text-sm text-slate-500">ต้องการบัญชีสำหรับกรรมการ? ดูที่ <Link href="/presentation" className="underline">หน้าสำหรับกรรมการ</Link></p>
+      <p className="text-sm text-slate-500">อยากดูแบบสไลด์? <Link href="/pitch" className="underline">เปิดแบบสไลด์</Link> · ต้องการบัญชีสำหรับกรรมการ? ดูที่ <Link href="/presentation" className="underline">หน้าสำหรับกรรมการ</Link></p>
     </main>
   );
 }

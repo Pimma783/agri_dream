@@ -8,6 +8,6 @@ describe('/start chooser', () => {
   it('offers the prototype and the presentation', () => {
     render(<StartPage />);
     expect(screen.getByRole('link', { name: 'เข้าสู่ต้นแบบ' }).getAttribute('href')).toBe('/login');
-    expect(screen.getByRole('link', { name: 'เปิดการนำเสนอ' }).getAttribute('href')).toBe('/pitch');
+    expect(screen.getByRole('link', { name: 'เปิดการนำเสนอ' }).getAttribute('href')).toBe('/story');
   });
 });
